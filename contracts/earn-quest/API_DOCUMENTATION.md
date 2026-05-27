@@ -3,6 +3,8 @@
 ## Overview
 This document provides comprehensive documentation for all public functions in the EarnQuest contract codebase. Each function includes a description, arguments, return types, and example usage where applicable.
 
+For operational success-rate and latency commitments for these methods, see [SLA_SLO.md](./SLA_SLO.md).
+
 ## Table of Contents
 - [initialize](#initialize)
 - [authorize_upgrade](#authorize_upgrade)

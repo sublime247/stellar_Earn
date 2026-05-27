@@ -4,6 +4,8 @@
 
 This guide provides step-by-step instructions for migrating and upgrading the EarnQuest smart contract across different versions and network environments.
 
+For operational targets around contract success rates and latency windows, see [SLA_SLO.md](./SLA_SLO.md).
+
 ---
 
 ## 🔄 Migration Paths

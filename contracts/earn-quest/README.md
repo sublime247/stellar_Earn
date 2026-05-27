@@ -71,6 +71,12 @@ make snapshots-stats
 
 See [SNAPSHOT_MANAGEMENT.md](./SNAPSHOT_MANAGEMENT.md) for complete documentation.
 
+### Operations
+
+- [SLA / SLO Definitions](./SLA_SLO.md)
+- [Migration Guide](./MIGRATION_GUIDE.md)
+- [API Documentation](./API_DOCUMENTATION.md)
+
 ## Project Structure
 
 ```
