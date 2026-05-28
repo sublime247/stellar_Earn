@@ -42,8 +42,65 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy() {
-    await Promise.all(Object.values(this.queues).map((q) => q.close()));
-    await Promise.all(this.workers.map((w) => w.close()));
+    this.logger.log('Initiating graceful shutdown of background workers and queues...');
+
+    const timeoutMs = parseInt(process.env.WORKER_SHUTDOWN_TIMEOUT_MS || '10000', 10);
+
+    // 1. Pause all workers to stop fetching new jobs
+    if (this.workers.length > 0) {
+      this.logger.log(`Pausing ${this.workers.length} workers...`);
+      await Promise.all(
+        this.workers.map(async (worker) => {
+          try {
+            await worker.pause(true);
+            this.logger.log(`Worker for queue ${worker.name} paused.`);
+          } catch (error) {
+            this.logger.error(`Error pausing worker for queue ${worker.name}: ${error.message}`);
+          }
+        }),
+      );
+
+      // 2. Close/drain workers with timeout
+      this.logger.log(`Closing and draining workers (timeout: ${timeoutMs}ms)...`);
+      await Promise.all(
+        this.workers.map(async (worker) => {
+          try {
+            const closePromise = worker.close();
+            const timeoutPromise = new Promise<void>((_, reject) =>
+              setTimeout(() => reject(new Error(`Drain timeout of ${timeoutMs}ms exceeded`)), timeoutMs)
+            );
+            await Promise.race([closePromise, timeoutPromise]);
+            this.logger.log(`Worker for queue ${worker.name} closed successfully.`);
+          } catch (error) {
+            this.logger.warn(`Failed to drain worker for queue ${worker.name} gracefully: ${error.message}. Force closing...`);
+            try {
+              await worker.close(true);
+              this.logger.log(`Worker for queue ${worker.name} force closed.`);
+            } catch (forceError) {
+              this.logger.error(`Error force closing worker for queue ${worker.name}: ${forceError.message}`);
+            }
+          }
+        }),
+      );
+    }
+
+    // 3. Once workers are completely closed, safely close the queues
+    const queueNames = Object.keys(this.queues);
+    if (queueNames.length > 0) {
+      this.logger.log(`Closing ${queueNames.length} queues...`);
+      await Promise.all(
+        Object.entries(this.queues).map(async ([name, queue]) => {
+          try {
+            await queue.close();
+            this.logger.log(`Queue ${name} closed successfully.`);
+          } catch (error) {
+            this.logger.error(`Error closing queue ${name}: ${error.message}`);
+          }
+        }),
+      );
+    }
+
+    this.logger.log('Graceful shutdown completed.');
   }
 
   getQueue(name: string) {
