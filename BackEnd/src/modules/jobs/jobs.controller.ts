@@ -1,22 +1,14 @@
-import {
-  Controller,
-  Get,
-  Logger,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, Param, Logger, NotFoundException } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { JobsService } from './jobs.service';
 
-/**
- * Minimal Jobs Controller
- * Only implements essential endpoints for server startup
- */
 @ApiTags('Jobs')
 @Controller('jobs')
 export class JobsController {
   private readonly logger = new Logger(JobsController.name);
 
-  /**
-   * Health check endpoint
-   */
+  constructor(private readonly jobsService: JobsService) {}
+
   @Get('health')
   @ApiOperation({ summary: 'Job system health check' })
   @ApiResponse({ status: 200, description: 'Job system is healthy' })
@@ -28,9 +20,6 @@ export class JobsController {
     };
   }
 
-  /**
-   * Basic info endpoint
-   */
   @Get()
   @ApiOperation({ summary: 'Get job system info' })
   @ApiResponse({ status: 200, description: 'Job system information' })
@@ -38,12 +27,26 @@ export class JobsController {
     return {
       status: 'operational',
       version: '1.0.0',
-      features: [
-        'job scheduling',
-        'queue management',
-        'monitoring'
-      ],
+      features: ['job scheduling', 'queue management', 'monitoring'],
       timestamp: new Date().toISOString(),
     };
+  }
+
+  @Get('metrics')
+  @ApiOperation({ summary: 'Export queue metrics (active, delayed, failed, completed, waiting) for all queues' })
+  @ApiResponse({ status: 200, description: 'Queue metrics for all queues' })
+  async getQueueMetrics() {
+    return this.jobsService.getQueueMetrics();
+  }
+
+  @Get('metrics/:queue')
+  @ApiOperation({ summary: 'Export queue metrics for a specific queue' })
+  @ApiParam({ name: 'queue', description: 'Queue name' })
+  @ApiResponse({ status: 200, description: 'Queue metrics' })
+  @ApiResponse({ status: 404, description: 'Queue not found' })
+  async getQueueMetricsByName(@Param('queue') queue: string) {
+    const metrics = await this.jobsService.getQueueMetricsByName(queue);
+    if (!metrics) throw new NotFoundException(`Queue "${queue}" not found`);
+    return metrics;
   }
 }
