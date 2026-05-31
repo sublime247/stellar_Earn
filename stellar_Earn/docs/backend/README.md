@@ -37,4 +37,3 @@ These apply to every module and are assumed (not repeated) on each page below.
 Start with [Data Flow & Diagrams](./data-flow.md) for the mental model, then use the [Module API Reference](./module-apis.md) as a lookup. Diagrams are written in [Mermaid](https://mermaid.js.org/) so they render directly on GitHub and inside any docs-site generator (Docusaurus, MkDocs Material, VitePress) without a build step.
  
 > **Scope note.** Route lists here are curated for orientation — the most useful and stable endpoints per module — not an exhaustive dump. Treat the running Swagger UI as authoritative for the complete, current list and for exact payloads.
- 
