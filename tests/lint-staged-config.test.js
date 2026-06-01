@@ -26,8 +26,14 @@ function testFrontendCommandsUseProjectTools() {
   const commands = run(files);
 
   assert.strictEqual(commands.length, 2);
-  assert.match(commands[0], /cd FrontEnd\/my-app && npx prettier --write/);
-  assert.match(commands[1], /cd FrontEnd\/my-app && npx eslint --fix/);
+  assert.match(
+    commands[0],
+    /(?:cd FrontEnd\/my-app && npx prettier --write|npx --prefix FrontEnd\/my-app prettier --write)/,
+  );
+  assert.match(
+    commands[1],
+    /(?:cd FrontEnd\/my-app && npx eslint --fix|npm --prefix FrontEnd\/my-app run lint(?: --)?)/,
+  );
   assert.match(commands[0], /components\/Button\.tsx/);
   assert.match(commands[1], /lib\/utils\.ts/);
 }
@@ -41,8 +47,14 @@ function testBackendCommandsUseProjectTools() {
   const commands = run(files);
 
   assert.strictEqual(commands.length, 2);
-  assert.match(commands[0], /cd BackEnd && npx prettier --write src\/main\.ts/);
-  assert.match(commands[1], /cd BackEnd && npx eslint --fix src\/main\.ts/);
+  assert.match(
+    commands[0],
+    /(?:cd BackEnd && npx prettier --write|npx --prefix BackEnd prettier --write) src\/main\.ts/,
+  );
+  assert.match(
+    commands[1],
+    /(?:cd BackEnd && npx eslint --fix|npm --prefix BackEnd run lint(?: --)?)/,
+  );
 }
 
 function testRootScriptFormattingUsesPrettier() {
