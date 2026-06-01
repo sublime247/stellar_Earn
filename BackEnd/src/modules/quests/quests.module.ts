@@ -6,9 +6,10 @@ import { Quest } from './entities/quest.entity';
 import { CacheModule } from '../cache/cache.module';
 import { QuestNotificationsListener } from './events/quest-notifications.listener';
 import { ModerationModule } from '../moderation/moderation.module';
+import { QuotaModule } from '../quota/quota.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Quest]), CacheModule, ModerationModule],
+  imports: [TypeOrmModule.forFeature([Quest]), CacheModule, ModerationModule, QuotaModule],
   controllers: [QuestsController],
   providers: [QuestsService, QuestNotificationsListener],
   exports: [QuestsService],

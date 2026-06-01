@@ -10,6 +10,7 @@ import { QuestsService } from './quests.service';
 import { Quest } from './entities/quest.entity';
 import { CacheService } from '../cache/cache.service';
 import { ModerationService } from '../moderation/moderation.service';
+import { QuotaService } from '../quota/quota.service';
 
 const mockScan = { shouldBlock: false, keywordHits: [] };
 
@@ -33,6 +34,10 @@ const mockModeration = () => ({
   saveQuestModerationItem: jest.fn().mockResolvedValue(undefined),
 });
 
+const mockQuota = () => ({
+  enforceQuestCreationQuota: jest.fn().mockResolvedValue(undefined),
+});
+
 describe('QuestsService', () => {
   let service: QuestsService;
   let repo: ReturnType<typeof mockRepo>;
@@ -53,6 +58,7 @@ describe('QuestsService', () => {
         { provide: CacheService, useValue: cache },
         { provide: EventEmitter2, useValue: emitter },
         { provide: ModerationService, useValue: moderation },
+        { provide: QuotaService, useValue: mockQuota() },
       ],
     }).compile();
 

@@ -42,6 +42,7 @@ import { CACHE_KEYS, CACHE_TTL } from '../../config/cache.config';
 
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ModerationService } from '../moderation/moderation.service';
+import { QuotaService } from '../quota/quota.service';
 
 @Injectable()
 export class QuestsService {
@@ -51,6 +52,7 @@ export class QuestsService {
     private readonly cacheService: CacheService,
     private readonly eventEmitter: EventEmitter2,
     private readonly moderationService: ModerationService,
+    private readonly quotaService: QuotaService,
   ) { }
 
   async create(
@@ -62,6 +64,8 @@ export class QuestsService {
         throw new BadRequestException('End date must be after start date');
       }
     }
+
+    await this.quotaService.enforceQuestCreationQuota(creatorAddress);
 
     const quest = this.questRepository.create({
       ...createQuestDto,
