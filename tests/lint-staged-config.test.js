@@ -49,8 +49,9 @@ function testBackendCommandsUseProjectTools() {
   assert.strictEqual(commands.length, 2);
   assert.match(
     commands[0],
-    /(?:cd BackEnd && npx prettier --write|npx --prefix BackEnd prettier --write) src\/main\.ts/,
+    /(?:cd BackEnd && npx prettier --write|npx --prefix BackEnd prettier --write)/,
   );
+  assert.match(commands[0], /src[\\/]main\.ts/);
   assert.match(
     commands[1],
     /(?:cd BackEnd && npx eslint --fix|npm --prefix BackEnd run lint(?: --)?)/,

@@ -75,7 +75,7 @@ export function Modal({
     };
   }, [isOpen, handleEscape]);
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleBackdropClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (e.target === e.currentTarget && closeOnBackdrop) {
       onClose();
     }

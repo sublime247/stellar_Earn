@@ -76,7 +76,10 @@ export const SubmissionsTable = memo(function SubmissionsTable({
             const hasProof = proofDisplay !== '-';
 
             return (
-              <tr key={submission.id} className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800">
+              <tr
+                key={submission.id}
+                className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800"
+              >
                 <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-zinc-900 dark:text-zinc-50">
                   <button
                     type="button"
@@ -130,7 +133,8 @@ export const SubmissionsTable = memo(function SubmissionsTable({
                     className="w-full text-left"
                     aria-label={`View reward for submission ${submission.id}`}
                   >
-                    {submission.quest.rewardAmount} {submission.quest.rewardAsset}
+                    {submission.quest.rewardAmount}{' '}
+                    {submission.quest.rewardAsset}
                   </button>
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">

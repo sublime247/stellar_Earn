@@ -32,7 +32,6 @@ export function DeadlineTimer({
     return () => clearInterval(interval);
     // Only re-run when the deadline string or the external isExpired flag changes,
     // not on every tick — avoids interval thrash.
-
   }, [deadline, isExpired]);
 
   if (isExpired || timeRemaining.isExpired) {
