@@ -2,16 +2,16 @@ name: Bundle Size PR Check
 
 on:
   pull_request:
-    branches: [ "main", "master" ]
+    branches: ["main", "master"]
     paths:
-      - 'FrontEnd/my-app/**'
-      - 'package.json'
-      - 'package-lock.json'
+      - "FrontEnd/my-app/**"
+      - "package.json"
+      - "package-lock.json"
 
 jobs:
   bundle-size:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -19,9 +19,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: './FrontEnd/my-app/package-lock.json'
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: "./FrontEnd/my-app/package-lock.json"
+
+      - name: Clear npm cache
+        run: npm cache clean --force
 
       - name: Install dependencies
         working-directory: ./FrontEnd/my-app
