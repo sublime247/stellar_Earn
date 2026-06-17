@@ -1,5 +1,7 @@
 use crate::errors::Error;
-use soroban_sdk::{token, Address, Env};
+use crate::escrow;
+use crate::storage;
+use soroban_sdk::{token, Address, Env, Symbol};
 
 /// Transfer rewards from the contract escrow to the user (gas-optimized).
 ///
@@ -47,10 +49,6 @@ pub fn transfer_reward(
 // ═══════════════════════════════════════════════════════════════
 // ADD below the existing transfer_reward function
 // ═══════════════════════════════════════════════════════════════
-
-use crate::escrow;
-use crate::storage;
-use soroban_sdk::Symbol;
 
 /// Transfer reward with escrow tracking.
 ///
