@@ -72,11 +72,11 @@ const statusConfig = {
 const difficultyConfig = {
   [QuestDifficulty.EASY]: {
     label: 'Easy',
-    className: 'bg-green-500 text-white',
+    className: 'bg-green-500 text-green-900',
   },
   [QuestDifficulty.MEDIUM]: {
     label: 'Medium',
-    className: 'bg-orange-500 text-white',
+    className: 'bg-orange-500 text-orange-950',
   },
   [QuestDifficulty.HARD]: {
     label: 'Hard',
