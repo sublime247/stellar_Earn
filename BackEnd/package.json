@@ -162,7 +162,11 @@
     "moduleNameMapper": {
       "^#src/(.*)$": "<rootDir>/src/$1",
       "^src/(.*)$": "<rootDir>/src/$1"
-    }
+    },
+    "testTimeout": 30000,
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/setup-unit-afterenv.ts"
+    ]
   },
   "overrides": {
     "cookie": "0.7.2"
