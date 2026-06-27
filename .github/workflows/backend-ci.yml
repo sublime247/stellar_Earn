@@ -1,5 +1,9 @@
 name: Backend CI
 # This workflow is triggered on push and pull request events for the main and master branches, specifically when changes are made to the BackEnd directory or the workflow file itself. It consists of two jobs: "build-and-lint" and "backend-ci-gate".
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   push:
     branches: [main, master]
