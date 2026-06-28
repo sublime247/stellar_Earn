@@ -11,7 +11,9 @@ test.describe('Modal Focus Management - Accessibility', () => {
   });
 
   test('should trap focus within modal when open', async ({ page }) => {
-    const connectButton = page.getByRole('button', { name: /connect|wallet|sign in/i }).first();
+    const connectButton = page
+      .getByRole('button', { name: /connect|wallet|sign in/i })
+      .first();
     if (await connectButton.isVisible()) {
       await connectButton.click();
       await expectAxeToPass({ page });
@@ -19,7 +21,9 @@ test.describe('Modal Focus Management - Accessibility', () => {
   });
 
   test('should close modal on Escape key press', async ({ page }) => {
-    const connectButton = page.getByRole('button', { name: /connect|wallet|sign in/i }).first();
+    const connectButton = page
+      .getByRole('button', { name: /connect|wallet|sign in/i })
+      .first();
     if (await connectButton.isVisible()) {
       await connectButton.click();
       await page.keyboard.press('Escape');

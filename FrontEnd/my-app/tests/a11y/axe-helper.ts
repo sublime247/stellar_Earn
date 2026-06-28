@@ -10,9 +10,7 @@ export interface AxeSmokeOptions {
   disableRules?: string[];
 }
 
-const DEFAULT_DISABLED_RULES = [
-  'color-contrast',
-];
+const DEFAULT_DISABLED_RULES = ['color-contrast'];
 
 export async function runAxeSmoke(options: AxeSmokeOptions) {
   const {
@@ -33,7 +31,10 @@ export async function runAxeSmoke(options: AxeSmokeOptions) {
     .analyze();
 
   const violationsOfConcern = results.violations.filter(
-    (v) => v.impact === impactLevel || impactLevel === 'critical' || impactLevel === 'serious',
+    (v) =>
+      v.impact === impactLevel ||
+      impactLevel === 'critical' ||
+      impactLevel === 'serious'
   );
 
   return {
@@ -47,13 +48,13 @@ export async function runAxeSmoke(options: AxeSmokeOptions) {
 export async function expectAxeToPass(options: AxeSmokeOptions) {
   const { violations, violationsOfConcern } = await runAxeSmoke(options);
 
-  const allToCheck = violationsOfConcern.length > 0 ? violationsOfConcern : violations;
+  const allToCheck =
+    violationsOfConcern.length > 0 ? violationsOfConcern : violations;
 
   if (allToCheck.length > 0) {
     const summary = allToCheck
       .map(
-        (v) =>
-          `- ${v.id}: ${v.help} (${v.impact}) [${v.nodes.length} nodes]`,
+        (v) => `- ${v.id}: ${v.help} (${v.impact}) [${v.nodes.length} nodes]`
       )
       .join('\n');
 

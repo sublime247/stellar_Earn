@@ -8,7 +8,11 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 2 : 1,
   reporter: process.env.CI
-    ? [['github'], ['html', { outputFolder: 'playwright-a11y-report' }], ['json', { outputFile: 'playwright-a11y-report/results.json' }]]
+    ? [
+        ['github'],
+        ['html', { outputFolder: 'playwright-a11y-report' }],
+        ['json', { outputFile: 'playwright-a11y-report/results.json' }],
+      ]
     : [['list'], ['html', { outputFolder: 'playwright-a11y-report' }]],
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
