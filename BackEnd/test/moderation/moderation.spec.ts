@@ -67,7 +67,9 @@ describe('ModerationService', () => {
       create: jest.fn((x: ModerationAppeal) => x),
       save: jest.fn(async (x: ModerationAppeal) => x),
       findOne: jest.fn(),
-      findAndCount: jest.fn(async () => [[], 0] as [ModerationAppeal[], number]),
+      findAndCount: jest.fn(
+        async () => [[], 0] as [ModerationAppeal[], number],
+      ),
       count: jest.fn(async () => 0),
     };
 
@@ -83,7 +85,10 @@ describe('ModerationService', () => {
         ContentClassifierService,
         ImageModerationService,
         ExternalModerationApiService,
-        { provide: getRepositoryToken(ModerationItem), useValue: itemRepo as unknown as Repository<ModerationItem> },
+        {
+          provide: getRepositoryToken(ModerationItem),
+          useValue: itemRepo as unknown as Repository<ModerationItem>,
+        },
         {
           provide: getRepositoryToken(ModerationAppeal),
           useValue: appealRepo as unknown as Repository<ModerationAppeal>,

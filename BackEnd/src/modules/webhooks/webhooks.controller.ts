@@ -26,9 +26,12 @@ import {
   WebhookResponseDto,
   WebhookHealthResponseDto,
 } from './dto/webhook-response.dto';
-import { ExecutionTraceService } from '../trace/execution-trace.service';
+import { TraceService } from '../trace/trace.service';
 import { TraceIdUtil } from '../trace/trace-id.util';
-import { TraceContextStorage, TraceContext } from '../trace/trace-context.storage';
+import {
+  TraceContextStorage,
+  TraceContext,
+} from '../trace/trace-context.storage';
 import { TraceStatus } from '../trace/trace.types';
 
 @ApiTags('Webhooks')
@@ -38,7 +41,7 @@ export class WebhooksController {
 
   constructor(
     private readonly webhooksService: WebhooksService,
-    private readonly traceService: ExecutionTraceService,
+    private readonly traceService: TraceService,
   ) {}
 
   /**
@@ -65,16 +68,19 @@ export class WebhooksController {
     @Headers('x-github-event') eventType: string,
     @Headers('x-github-delivery') deliveryId: string,
     @Headers('x-hub-signature-256') signature: string,
-    @Headers() headers: any,
   ): Promise<WebhookResponse> {
-    if (!eventType) throw new BadRequestException('Missing X-GitHub-Event header');
-    if (!deliveryId) throw new BadRequestException('Missing X-GitHub-Delivery header');
+    if (!eventType)
+      throw new BadRequestException('Missing X-GitHub-Event header');
+    if (!deliveryId)
+      throw new BadRequestException('Missing X-GitHub-Delivery header');
 
     const traceId = TraceIdUtil.generate(deliveryId);
     const traceCtx: TraceContext = { traceId, webhookEventId: deliveryId };
 
     return TraceContextStorage.run(traceCtx, async () => {
-      this.logger.log(`[${traceId}] Received GitHub webhook: ${eventType} (${deliveryId})`);
+      this.logger.log(
+        `[${traceId}] Received GitHub webhook: ${eventType} (${deliveryId})`,
+      );
 
       await this.traceService.createTrace({
         traceId,
@@ -97,8 +103,14 @@ export class WebhooksController {
         const response = await this.webhooksService.processWebhook(event);
 
         if (!response.success) {
-          await this.traceService.appendEvent(traceId, TraceStatus.FAILED, response.message);
-          this.logger.warn(`[${traceId}] GitHub webhook processing failed: ${response.message}`);
+          await this.traceService.appendEvent(
+            traceId,
+            TraceStatus.FAILED,
+            response.message,
+          );
+          this.logger.warn(
+            `[${traceId}] GitHub webhook processing failed: ${response.message}`,
+          );
           throw new UnauthorizedException(response.message);
         }
 
@@ -129,7 +141,10 @@ export class WebhooksController {
             { error: error.message },
           );
         }
-        this.logger.error(`[${traceId}] GitHub webhook error: ${error.message}`, error.stack);
+        this.logger.error(
+          `[${traceId}] GitHub webhook error: ${error.message}`,
+          error.stack,
+        );
         throw error;
       }
     });
@@ -149,23 +164,29 @@ export class WebhooksController {
     description: 'Verification processed',
     type: WebhookResponseDto,
   })
-  @ApiResponse({ status: 400, description: 'Invalid webhook headers or payload' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid webhook headers or payload',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async handleApiVerificationWebhook(
     @Body() payload: any,
     @Headers('x-event-type') eventType: string,
     @Headers('x-webhook-id') webhookId: string,
     @Headers('authorization') authHeader: string,
-    @Headers() headers: any,
   ): Promise<WebhookResponse> {
-    if (!eventType) throw new BadRequestException('Missing X-Event-Type header');
-    if (!webhookId) throw new BadRequestException('Missing X-Webhook-ID header');
+    if (!eventType)
+      throw new BadRequestException('Missing X-Event-Type header');
+    if (!webhookId)
+      throw new BadRequestException('Missing X-Webhook-ID header');
 
     const traceId = TraceIdUtil.generate(webhookId);
     const traceCtx: TraceContext = { traceId, webhookEventId: webhookId };
 
     return TraceContextStorage.run(traceCtx, async () => {
-      this.logger.log(`[${traceId}] Received API verification webhook: ${eventType} (${webhookId})`);
+      this.logger.log(
+        `[${traceId}] Received API verification webhook: ${eventType} (${webhookId})`,
+      );
 
       await this.traceService.createTrace({
         traceId,
@@ -193,8 +214,14 @@ export class WebhooksController {
         const response = await this.webhooksService.processWebhook(event);
 
         if (!response.success) {
-          await this.traceService.appendEvent(traceId, TraceStatus.FAILED, response.message);
-          this.logger.warn(`[${traceId}] API webhook processing failed: ${response.message}`);
+          await this.traceService.appendEvent(
+            traceId,
+            TraceStatus.FAILED,
+            response.message,
+          );
+          this.logger.warn(
+            `[${traceId}] API webhook processing failed: ${response.message}`,
+          );
           throw new UnauthorizedException(response.message);
         }
 
@@ -224,7 +251,10 @@ export class WebhooksController {
             { error: error.message },
           );
         }
-        this.logger.error(`[${traceId}] API webhook error: ${error.message}`, error.stack);
+        this.logger.error(
+          `[${traceId}] API webhook error: ${error.message}`,
+          error.stack,
+        );
         throw error;
       }
     });
@@ -257,7 +287,9 @@ export class WebhooksController {
     const traceCtx: TraceContext = { traceId, webhookEventId: eventId };
 
     return TraceContextStorage.run(traceCtx, async () => {
-      this.logger.log(`[${traceId}] Received generic webhook from ${service}: ${eventType}`);
+      this.logger.log(
+        `[${traceId}] Received generic webhook from ${service}: ${eventType}`,
+      );
 
       await this.traceService.createTrace({
         traceId,
@@ -280,7 +312,11 @@ export class WebhooksController {
         const response = await this.webhooksService.processWebhook(event);
 
         if (!response.success) {
-          await this.traceService.appendEvent(traceId, TraceStatus.FAILED, response.message);
+          await this.traceService.appendEvent(
+            traceId,
+            TraceStatus.FAILED,
+            response.message,
+          );
           throw new UnauthorizedException(response.message);
         }
 
@@ -310,7 +346,10 @@ export class WebhooksController {
             { error: error.message },
           );
         }
-        this.logger.error(`[${traceId}] Generic webhook error: ${error.message}`, error.stack);
+        this.logger.error(
+          `[${traceId}] Generic webhook error: ${error.message}`,
+          error.stack,
+        );
         throw error;
       }
     });

@@ -5,14 +5,12 @@ import {
   type SystemAnnouncementTemplateData,
 } from './notification.interface';
 import type { EmailTemplateEngine } from '#src/modules/email/templates/template.engine';
-import { EmailTemplate } from '#src/modules/email/dto/email.dto';
 
 const assertNonEmptyString = (value: unknown, field: string): void => {
   if (typeof value !== 'string' || value.trim().length === 0) {
     throw new Error(`Missing required field: ${field}`);
   }
 };
-
 
 export const renderSystemAnnouncementTemplate: NotificationTemplateRenderFn<
   SystemAnnouncementTemplateData
@@ -23,7 +21,7 @@ export const renderSystemAnnouncementTemplate: NotificationTemplateRenderFn<
   assertNonEmptyString(data.username, 'username');
   assertNonEmptyString(data.message, 'message');
 
-  const rendered = engine.render(systemAnnouncementEmailTemplate as EmailTemplate, {
+  const rendered = engine.render(systemAnnouncementEmailTemplate, {
     username: data.username,
     title: data.title,
     message: data.message,
@@ -33,4 +31,3 @@ export const renderSystemAnnouncementTemplate: NotificationTemplateRenderFn<
 
   return rendered;
 };
-

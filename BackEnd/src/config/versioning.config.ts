@@ -66,7 +66,7 @@ export const extractApiVersion = (req: Request): string | undefined => {
     return fromUri;
   }
 
-  return extractVersionFromHeaders(req.headers as Record<string, unknown>);
+  return extractVersionFromHeaders(req.headers);
 };
 
 export const isVersionSupported = (version: string): boolean =>

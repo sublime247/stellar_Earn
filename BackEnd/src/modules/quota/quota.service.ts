@@ -23,20 +23,26 @@ export class QuotaService {
   /** Upserts a quota config for a tenant. */
   async setConfig(
     tenantId: string,
-    config: Partial<Omit<QuotaConfig, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>>,
+    config: Partial<
+      Omit<QuotaConfig, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>
+    >,
   ): Promise<QuotaConfig> {
     const existing = await this.configRepo.findOne({ where: { tenantId } });
     if (existing) {
       Object.assign(existing, config);
       return this.configRepo.save(existing);
     }
-    return this.configRepo.save(this.configRepo.create({ tenantId, ...config }));
+    return this.configRepo.save(
+      this.configRepo.create({ tenantId, ...config }),
+    );
   }
 
   /** Computes the start of the current quota period for a given config. */
   getPeriodStart(config: QuotaConfig, now = new Date()): Date {
     const periodMs = config.periodSeconds * 1000;
-    const periodStart = new Date(Math.floor(now.getTime() / periodMs) * periodMs);
+    const periodStart = new Date(
+      Math.floor(now.getTime() / periodMs) * periodMs,
+    );
     return periodStart;
   }
 
@@ -80,11 +86,7 @@ export class QuotaService {
       );
     }
 
-    await this.usageRepo.increment(
-      { id: usage.id },
-      'questCount',
-      1,
-    );
+    await this.usageRepo.increment({ id: usage.id }, 'questCount', 1);
   }
 
   /**

@@ -25,11 +25,10 @@ export class ExternalHealthService implements OnModuleInit {
 
   constructor(private readonly configService: ConfigService) {}
 
-  async onModuleInit() {
+  onModuleInit(): void {
     // Read directly from environment variables for independence from feature modules
-    this.stellarRpcUrl = 
-      process.env.SOROBAN_RPC_URL || 
-      'https://soroban-testnet.stellar.org';
+    this.stellarRpcUrl =
+      process.env.SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org';
     this.sendgridApiKey = process.env.SENDGRID_API_KEY;
   }
 
@@ -41,28 +40,39 @@ export class ExternalHealthService implements OnModuleInit {
     ]);
 
     const results: HealthCheckResult[] = [
-      ...(stellarResult.status === 'fulfilled' ? [stellarResult.value] : [{
-        status: 'down' as ServiceStatus,
-        latency: 0,
-        error: 'Stellar check failed to complete',
-      }]),
-      ...(sendgridResult.status === 'fulfilled' ? [sendgridResult.value] : [{
-        status: 'down' as ServiceStatus,
-        latency: 0,
-        error: 'SendGrid check failed to complete',
-      }]),
+      ...(stellarResult.status === 'fulfilled'
+        ? [stellarResult.value]
+        : [
+            {
+              status: 'down' as ServiceStatus,
+              latency: 0,
+              error: 'Stellar check failed to complete',
+            },
+          ]),
+      ...(sendgridResult.status === 'fulfilled'
+        ? [sendgridResult.value]
+        : [
+            {
+              status: 'down' as ServiceStatus,
+              latency: 0,
+              error: 'SendGrid check failed to complete',
+            },
+          ]),
     ];
 
     // Overall status: if any is 'down', external is 'down'; else if any is 'degraded', external is 'degraded'; else 'ok'
     const status = this.aggregateStatus(results);
-    const avgLatency = results.length > 0 
-      ? Math.round(results.reduce((sum, r) => sum + r.latency, 0) / results.length)
-      : 0;
+    const avgLatency =
+      results.length > 0
+        ? Math.round(
+            results.reduce((sum, r) => sum + r.latency, 0) / results.length,
+          )
+        : 0;
 
     // Collect errors from down/degraded services
     const errors = results
-      .filter(r => r.status !== 'ok')
-      .map(r => r.error)
+      .filter((r) => r.status !== 'ok')
+      .map((r) => r.error)
       .filter(Boolean);
 
     return {
@@ -74,7 +84,7 @@ export class ExternalHealthService implements OnModuleInit {
 
   private async checkStellar(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       const response = await axios.post(
         this.stellarRpcUrl,
@@ -111,7 +121,7 @@ export class ExternalHealthService implements OnModuleInit {
       const latency = Date.now() - startTime;
       const errorMessage = this.getErrorMessage(error);
       this.logger.error(`Stellar RPC health check failed: ${errorMessage}`);
-      
+
       return {
         status: 'down',
         latency,
@@ -165,7 +175,7 @@ export class ExternalHealthService implements OnModuleInit {
       const latency = Date.now() - startTime;
       const errorMessage = this.getErrorMessage(error);
       this.logger.error(`SendGrid API health check failed: ${errorMessage}`);
-      
+
       return {
         status: 'down',
         latency,
@@ -185,10 +195,10 @@ export class ExternalHealthService implements OnModuleInit {
   }
 
   private aggregateStatus(results: HealthCheckResult[]): ServiceStatus {
-    if (results.some(r => r.status === 'down')) {
+    if (results.some((r) => r.status === 'down')) {
       return 'down';
     }
-    if (results.some(r => r.status === 'degraded')) {
+    if (results.some((r) => r.status === 'degraded')) {
       return 'degraded';
     }
     return 'ok';

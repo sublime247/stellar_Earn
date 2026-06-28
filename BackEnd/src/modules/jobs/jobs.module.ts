@@ -15,13 +15,21 @@ import { AnalyticsProcessor } from './processors/analytics.processor';
 import { QuestProcessor } from './processors/quest.processor';
 import { QuestStateReconciliationProcessor } from './processors/quest-state-reconciliation.processor';
 import { DependencyProcessor } from './processors/dependency.processor';
-import { JobLog, JobLogRetry, JobDependency, JobSchedule } from './entities/job-log.entity';
+import {
+  JobLog,
+  JobLogRetry,
+  JobDependency,
+  JobSchedule,
+} from './entities/job-log.entity';
 import { DataExport } from '../users/entities/data-export.entity';
 import { DataExportListener } from './listeners/data-export.listener';
 import { Payout } from '../payouts/entities/payout.entity';
 import { Quest } from '../quests/entities/quest.entity';
+import { Submission } from '../submissions/entities/submission.entity';
 import { StellarModule } from '../stellar/stellar.module';
+import { AnalyticsModule } from '../analytics/analytics.module';
 import { DependencyFreshnessService } from '../../common/services/dependency-freshness.service';
+import { EventStore } from '../../events/entities/event-store.entity';
 
 @Module({
   imports: [
@@ -33,9 +41,12 @@ import { DependencyFreshnessService } from '../../common/services/dependency-fre
       DataExport,
       Payout,
       Quest,
+      Submission,
+      EventStore,
     ]),
     EventEmitterModule,
     StellarModule,
+    AnalyticsModule,
   ],
   providers: [
     JobsService,

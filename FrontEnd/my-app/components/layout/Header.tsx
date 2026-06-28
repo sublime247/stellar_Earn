@@ -10,7 +10,10 @@ import { ConnectButton } from '@/components/wallet/ConnectButton';
 import { WalletModal } from '@/components/wallet/WalletModal';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { GlobalSearch } from '@/components/search/GlobalSearch';
-import { isActiveRoute, useTranslatedNavigation } from '@/lib/config/navigation';
+import {
+  isActiveRoute,
+  useTranslatedNavigation,
+} from '@/lib/config/navigation';
 
 interface HeaderProps {
   onOpenMobileMenu?: () => void;

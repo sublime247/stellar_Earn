@@ -43,32 +43,39 @@ export class HealthController {
   // Backwards compatibility: /health maps to deep health check
   @Get()
   @SkipLogging()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Health check (legacy) — alias for /health/deep',
-    description: 'This endpoint is deprecated. Use /health/deep for full diagnostics.',
+    description:
+      'This endpoint is deprecated. Use /health/deep for full diagnostics.',
   })
-  async root(@Res({ passthrough: true }) res: Response): Promise<DeepHealthResponse> {
+  async root(
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<DeepHealthResponse> {
     this.logger.debug('Legacy health check (/) - redirecting to deep');
     return this.deep(res);
   }
 
   @Get('ready')
   @SkipLogging()
-  @ApiOperation({ 
-    summary: 'Readiness probe — returns 200 when ready to serve traffic (database + cache)',
-    description: 'Checks database and cache connectivity. Returns 503 if any critical dependency is down.',
+  @ApiOperation({
+    summary:
+      'Readiness probe — returns 200 when ready to serve traffic (database + cache)',
+    description:
+      'Checks database and cache connectivity. Returns 503 if any critical dependency is down.',
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Service is ready to accept traffic',
   })
-  @ApiResponse({ 
-    status: 503, 
+  @ApiResponse({
+    status: 503,
     description: 'Service is not ready - critical dependencies are down',
   })
-  async ready(@Res({ passthrough: true }) res: Response): Promise<ReadyHealthResponse> {
+  async ready(
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<ReadyHealthResponse> {
     this.logger.debug('Readiness check starting');
-    
+
     // Run database and cache checks in parallel
     const [dbResult, cacheResult] = await Promise.all([
       this.dbHealth.check(),
@@ -99,22 +106,26 @@ export class HealthController {
 
   @Get('deep')
   @SkipLogging()
-  @ApiOperation({ 
-    summary: 'Deep health diagnostics — full system check (database + cache + external)',
-    description: 'Performs comprehensive health checks on all critical dependencies including external services. ' +
-                 'Returns 503 if any service is down, 200 otherwise.',
+  @ApiOperation({
+    summary:
+      'Deep health diagnostics — full system check (database + cache + external)',
+    description:
+      'Performs comprehensive health checks on all critical dependencies including external services. ' +
+      'Returns 503 if any service is down, 200 otherwise.',
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'All systems operational or degraded',
   })
-  @ApiResponse({ 
-    status: 503, 
+  @ApiResponse({
+    status: 503,
     description: 'One or more critical services are down',
   })
-  async deep(@Res({ passthrough: true }) res: Response): Promise<DeepHealthResponse> {
+  async deep(
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<DeepHealthResponse> {
     this.logger.debug('Deep health check starting');
-    
+
     // Run all checks in parallel
     const [dbResult, cacheResult, externalResult] = await Promise.all([
       this.dbHealth.check(),
@@ -128,7 +139,11 @@ export class HealthController {
       external: this.mapServiceHealth(externalResult),
     };
 
-    const overallStatus = this.calculateOverallStatus([dbResult, cacheResult, externalResult]);
+    const overallStatus = this.calculateOverallStatus([
+      dbResult,
+      cacheResult,
+      externalResult,
+    ]);
 
     // Set HTTP status code based on overall status
     res.status(overallStatus === 'down' ? 503 : 200);
@@ -148,23 +163,25 @@ export class HealthController {
 
   @Get('metrics')
   @SkipLogging()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Prometheus metrics endpoint',
-    description: 'Returns application metrics in Prometheus text exposition format for scraping by Prometheus/Grafana.',
+    description:
+      'Returns application metrics in Prometheus text exposition format for scraping by Prometheus/Grafana.',
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Metrics in Prometheus format',
     content: {
       'text/plain': {
         schema: {
           type: 'string',
-          example: '# HELP http_requests_total Total HTTP requests received\n# TYPE http_requests_total counter\nhttp_requests_total 1234',
+          example:
+            '# HELP http_requests_total Total HTTP requests received\n# TYPE http_requests_total counter\nhttp_requests_total 1234',
         },
       },
     },
   })
-  async metrics(@Res() res: Response): Promise<void> {
+  metrics(@Res() res: Response): void {
     res.setHeader('Content-Type', 'text/plain; version=0.0.4');
     res.send(this.metricsService.getPrometheusOutput());
   }
@@ -178,10 +195,10 @@ export class HealthController {
   }
 
   private calculateOverallStatus(results: HealthCheckResult[]): ServiceStatus {
-    if (results.some(r => r.status === 'down')) {
+    if (results.some((r) => r.status === 'down')) {
       return 'down';
     }
-    if (results.some(r => r.status === 'degraded')) {
+    if (results.some((r) => r.status === 'degraded')) {
       return 'degraded';
     }
     return 'ok';

@@ -107,7 +107,7 @@ export class WebhooksService {
     }
   }
 
-  async retryFailedWebhook(eventId: string, maxRetries = 3): Promise<boolean> {
+  async retryFailedWebhook(eventId: string, _maxRetries = 3): Promise<boolean> {
     this.logger.log(`Attempting to retry webhook ${eventId}`);
 
     // In a real implementation, you would:

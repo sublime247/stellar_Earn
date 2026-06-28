@@ -169,4 +169,3 @@ describe('Notification templates (typed + engine rendering)', () => {
     });
   });
 });
-

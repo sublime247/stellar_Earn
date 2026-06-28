@@ -50,6 +50,29 @@ pub fn register_quest(
     verifier: &Address,
     deadline: u64,
 ) -> Result<(), Error> {
+    register_quest_with_category(
+        env,
+        id,
+        creator,
+        reward_asset,
+        reward_amount,
+        verifier,
+        deadline,
+        0,
+    )
+}
+
+/// Registers a new quest with an explicit numeric category for indexed queries.
+pub fn register_quest_with_category(
+    env: &Env,
+    id: &Symbol,
+    creator: &Address,
+    reward_asset: &Address,
+    reward_amount: i128,
+    verifier: &Address,
+    deadline: u64,
+    category: u32,
+) -> Result<(), Error> {
     validation::validate_symbol_length(id)?;
 
     if storage::has_quest(env, id) {
@@ -76,12 +99,16 @@ pub fn register_quest(
         reward_amount,
         verifier: verifier.clone(),
         deadline,
+        category,
         status: QuestStatus::Active,
         total_claims: 0,
     };
 
     storage::set_quest(env, id, &quest);
     storage::add_quest_id(env, id)?;
+    storage::add_quest_to_category_index(env, category, id)?;
+    storage::inc_platform_quests_created(env);
+    storage::add_platform_rewards_distributed(env, reward_amount as u128);
 
     events::quest_registered(
         env,
@@ -126,7 +153,15 @@ pub fn register_quest_with_metadata(
     deadline: u64,
     metadata: &QuestMetadata,
 ) -> Result<(), Error> {
-    register_quest(env, id, creator, reward_asset, reward_amount, verifier, deadline)?;
+    register_quest(
+        env,
+        id,
+        creator,
+        reward_asset,
+        reward_amount,
+        verifier,
+        deadline,
+    )?;
     validate_metadata(metadata)?;
     storage::set_quest_metadata(env, id, metadata);
     Ok(())
@@ -241,8 +276,7 @@ pub fn update_quest_metadata(
 ) -> Result<(), Error> {
     let quest = storage::get_quest(env, quest_id)?;
     if &quest.creator != updater
-        && !(storage::is_super_admin(env, updater)
-            || storage::has_role(env, updater, &Role::Admin))
+        && !(storage::is_super_admin(env, updater) || storage::has_role(env, updater, &Role::Admin))
     {
         return Err(Error::Unauthorized);
     }
@@ -263,11 +297,11 @@ fn validate_metadata(metadata: &QuestMetadata) -> Result<(), Error> {
 
     validation::validate_array_length(metadata.requirements.len(), MAX_METADATA_REQUIREMENTS)?;
     for i in 0..metadata.requirements.len() {
-        let requirement = metadata.requirements.get(i).ok_or(Error::IndexOutOfBounds)?;
-        validate_string_len(
-            &requirement,
-            MAX_METADATA_REQUIREMENT_LEN,
-        )?;
+        let requirement = metadata
+            .requirements
+            .get(i)
+            .ok_or(Error::IndexOutOfBounds)?;
+        validate_string_len(&requirement, MAX_METADATA_REQUIREMENT_LEN)?;
     }
 
     if let MetadataDescription::Inline(desc) = &metadata.description {
@@ -348,12 +382,7 @@ pub fn get_quests_by_status(
 /// # Returns
 ///
 /// A `Vec<Quest>` containing the matching quests.
-pub fn get_quests_by_creator(
-    env: &Env,
-    creator: &Address,
-    offset: u32,
-    limit: u32,
-) -> Vec<Quest> {
+pub fn get_quests_by_creator(env: &Env, creator: &Address, offset: u32, limit: u32) -> Vec<Quest> {
     let ids = storage::get_quest_ids(env);
     let mut results = Vec::new(env);
     let mut matched = 0u32;
@@ -367,6 +396,33 @@ pub fn get_quests_by_creator(
         if let Some(id) = ids.get(i) {
             if let Ok(quest) = storage::get_quest(env, &id) {
                 if &quest.creator == creator {
+                    if matched >= offset {
+                        results.push_back(quest);
+                        count += 1;
+                    }
+                    matched += 1;
+                }
+            }
+        }
+    }
+
+    results
+}
+
+/// Retrieves quests by numeric category using the category index.
+pub fn get_quests_by_category(env: &Env, category: u32, offset: u32, limit: u32) -> Vec<Quest> {
+    let ids = storage::get_quest_ids_by_category(env, category);
+    let mut results = Vec::new(env);
+    let mut matched = 0u32;
+    let mut count = 0u32;
+
+    for i in 0..ids.len() {
+        if i >= validation::MAX_SCAN_ITERATIONS || count >= limit {
+            break;
+        }
+        if let Some(id) = ids.get(i) {
+            if let Ok(quest) = storage::get_quest(env, &id) {
+                if quest.category == category {
                     if matched >= offset {
                         results.push_back(quest);
                         count += 1;

@@ -31,9 +31,14 @@ export class DataExportService {
         'user.data-export.requested',
         new DataExportRequestedEvent(userId, saved.id, exportType, format),
       );
-      this.logger.log(`Emitted data export request event for user ${userId} id=${saved.id}`);
+      this.logger.log(
+        `Emitted data export request event for user ${userId} id=${saved.id}`,
+      );
     } catch (err) {
-      this.logger.error('Failed to emit export request event', err?.stack || err);
+      this.logger.error(
+        'Failed to emit export request event',
+        err?.stack || err,
+      );
       saved.status = DataExportStatus.FAILED;
       await this.dataExportRepo.save(saved);
     }
@@ -42,14 +47,19 @@ export class DataExportService {
   }
 
   async markProcessing(id: string) {
-    await this.dataExportRepo.update(id, { status: DataExportStatus.PROCESSING });
+    await this.dataExportRepo.update(id, {
+      status: DataExportStatus.PROCESSING,
+    });
   }
 
   async markCompleted(id: string, payload: Partial<DataExport>) {
-    await this.dataExportRepo.update(id, { status: DataExportStatus.COMPLETED, ...payload });
+    await this.dataExportRepo.update(id, {
+      status: DataExportStatus.COMPLETED,
+      ...payload,
+    });
   }
 
-  async markFailed(id: string, error?: string) {
+  async markFailed(id: string, _error?: string) {
     await this.dataExportRepo.update(id, { status: DataExportStatus.FAILED });
   }
 }

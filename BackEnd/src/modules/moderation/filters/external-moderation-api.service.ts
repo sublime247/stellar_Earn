@@ -18,7 +18,8 @@ export class ExternalModerationApiService {
     if (!url?.trim()) {
       return null;
     }
-    const key = this.configService.get<string>('moderation.externalApiKey') || '';
+    const key =
+      this.configService.get<string>('moderation.externalApiKey') || '';
 
     try {
       const { data } = await axios.post<ExternalModerationResult>(
@@ -26,7 +27,10 @@ export class ExternalModerationApiService {
         { text, language: 'en' },
         {
           headers: key
-            ? { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }
+            ? {
+                Authorization: `Bearer ${key}`,
+                'Content-Type': 'application/json',
+              }
             : { 'Content-Type': 'application/json' },
           timeout: 8000,
         },

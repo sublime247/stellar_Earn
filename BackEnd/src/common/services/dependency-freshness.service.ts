@@ -41,7 +41,7 @@ export class DependencyFreshnessService {
 
     try {
       // Generate the freshness report
-      const report = await this.generateReport(
+      const report = this.generateReport(
         repositoryOwner,
         repositoryName,
         branch,
@@ -71,11 +71,11 @@ export class DependencyFreshnessService {
   /**
    * Generate a dependency freshness report
    */
-  private async generateReport(
+  private generateReport(
     repositoryOwner: string,
     repositoryName: string,
     branch: string,
-  ): Promise<FreshnessReport> {
+  ): FreshnessReport {
     this.logger.log('Generating dependency freshness report');
 
     // For now, this is a placeholder implementation

@@ -12,7 +12,10 @@ export class WebhookChannel implements NotificationChannel {
   private readonly logger = new Logger(WebhookChannel.name);
   readonly type = ChannelType.WEBHOOK;
 
-  async send(notification: Notification, recipient: any): Promise<DeliveryResult> {
+  async send(
+    notification: Notification,
+    recipient: any,
+  ): Promise<DeliveryResult> {
     try {
       if (!recipient.webhookUrl) {
         return {
@@ -23,8 +26,10 @@ export class WebhookChannel implements NotificationChannel {
         };
       }
 
-      this.logger.log(`Sending webhook notification to ${recipient.webhookUrl}`);
-      
+      this.logger.log(
+        `Sending webhook notification to ${recipient.webhookUrl}`,
+      );
+
       const response = await axios.post(recipient.webhookUrl, {
         id: notification.id,
         type: notification.type,
@@ -33,7 +38,7 @@ export class WebhookChannel implements NotificationChannel {
         metadata: notification.metadata,
         createdAt: notification.createdAt,
       });
-      
+
       return {
         success: true,
         channel: this.type,

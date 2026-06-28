@@ -9,12 +9,12 @@ import { Payout } from '../payouts/entities/payout.entity';
 import { MultiSigTransaction } from '../stellar/multisig/entities/multisig-transaction.entity';
 import { MultiSigWallet } from '../stellar/multisig/entities/multisig-wallet.entity';
 import { MultiSigModule } from '../stellar/multisig/multisig.module';
-import { ExecutionTraceModule } from '../trace/execution-trace.module';
+import { TraceModule } from '../trace/trace.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([MultiSigTransaction, Payout, MultiSigWallet]),
-    ExecutionTraceModule,
+    TraceModule,
     MultiSigModule,
   ],
   controllers: [WebhooksController],

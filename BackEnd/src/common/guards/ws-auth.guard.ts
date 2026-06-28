@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { WsException } from '@nestjs/websockets';
@@ -24,17 +29,17 @@ export class WsAuthGuard implements CanActivate {
     return this.validateClient(client);
   }
 
-   async validateClient(client: Socket): Promise<boolean> {
-     try {
-       const token = this.extractToken(client);
-       if (!token) {
-         throw new WsException('Missing authentication token');
-       }
+  async validateClient(client: Socket): Promise<boolean> {
+    try {
+      const token = this.extractToken(client);
+      if (!token) {
+        throw new WsException('Missing authentication token');
+      }
 
-       const publicKey = this.configService.get<string>('JWT_PUBLIC_KEY');
-       const payload = await this.jwtService.verifyAsync<WsAuthPayload>(token, {
-         publicKey,
-       });
+      const publicKey = this.configService.get<string>('JWT_PUBLIC_KEY');
+      const payload = await this.jwtService.verifyAsync<WsAuthPayload>(token, {
+        publicKey,
+      });
 
       client.data.user = {
         id: payload.sub,
@@ -53,8 +58,7 @@ export class WsAuthGuard implements CanActivate {
 
   private extractToken(client: Socket): string | null {
     const authHeader =
-      client.handshake?.auth?.token ||
-      client.handshake?.headers?.authorization;
+      client.handshake?.auth?.token || client.handshake?.headers?.authorization;
 
     if (!authHeader) return null;
 

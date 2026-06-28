@@ -111,9 +111,6 @@ pub enum Error {
     DisputeAlreadyAppealed = 87,
     DisputeNotResolved = 95,
 
-    // Submission withdrawal / re-submission
-    SubmissionNotRejected = 152,
-
     // Additional validation / escrow
     InvalidDeadline = 88,
     QuestCancelled = 89,

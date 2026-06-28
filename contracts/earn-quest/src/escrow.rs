@@ -223,11 +223,8 @@ fn refund_remaining(env: &Env, quest_id: &Symbol) -> Result<i128, Error> {
 
     if available > 0 {
         let token_client = token::Client::new(env, &token);
-        let transfer_result = token_client.try_transfer(
-            &env.current_contract_address(),
-            &depositor,
-            &available,
-        );
+        let transfer_result =
+            token_client.try_transfer(&env.current_contract_address(), &depositor, &available);
 
         match transfer_result {
             Ok(Ok(_)) => {}
@@ -274,6 +271,7 @@ pub fn cancel_quest(env: &Env, quest_id: &Symbol, caller: &Address) -> Result<i1
     let mut quest = quest;
     quest.status = QuestStatus::Cancelled;
     storage::set_quest(env, quest_id, &quest);
+    storage::remove_quest_from_category_index(env, quest.category, quest_id);
 
     // Refund escrow if it exists (uses a single read inside refund_remaining)
     let refunded = if storage::has_escrow(env, quest_id) {
@@ -321,6 +319,7 @@ pub fn expire_quest(env: &Env, quest_id: &Symbol, caller: &Address) -> Result<i1
     let mut quest = quest;
     quest.status = QuestStatus::Expired;
     storage::set_quest(env, quest_id, &quest);
+    storage::remove_quest_from_category_index(env, quest.category, quest_id);
 
     let refunded = if storage::has_escrow(env, quest_id) {
         refund_remaining(env, quest_id)?
@@ -473,7 +472,7 @@ pub fn slash_verifier_stake(
     env: &Env,
     quest_id: &Symbol,
     verifier: &Address,
-    slash_bps: u32,       // 0–10_000
+    slash_bps: u32, // 0–10_000
     slash_recipient: &Address,
 ) -> Result<u128, Error> {
     let mut stake = storage::get_verifier_stake(env, quest_id, verifier)?;

@@ -24,7 +24,8 @@ export interface QuestUpdateTemplateData {
   status: QuestUpdateStatus;
 }
 
-export const questUpdateEmailTemplate: EmailTemplate = EmailTemplate.GENERAL_NOTIFICATION;
+export const questUpdateEmailTemplate: EmailTemplate =
+  EmailTemplate.GENERAL_NOTIFICATION;
 
 // -------------------------
 // Submission status
@@ -68,4 +69,3 @@ export interface SystemAnnouncementTemplateData {
 
 export const systemAnnouncementEmailTemplate: EmailTemplate =
   EmailTemplate.GENERAL_NOTIFICATION;
-

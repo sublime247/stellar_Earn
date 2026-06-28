@@ -5,7 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Quest } from './entities/quest.entity';
 import { CreateQuestDto } from './dto/create-quest.dto';
 import { UpdateQuestDto } from './dto/update-quest.dto';
@@ -53,7 +53,7 @@ export class QuestsService {
     private readonly eventEmitter: EventEmitter2,
     private readonly moderationService: ModerationService,
     private readonly quotaService: QuotaService,
-  ) { }
+  ) {}
 
   async create(
     createQuestDto: CreateQuestDto,
@@ -110,92 +110,87 @@ export class QuestsService {
     return QuestResponseDto.fromEntity(savedQuest);
   }
 
-async findAll(queryDto: QueryQuestsDto): Promise<PaginatedQuestsResponseDto> {
-  const {
-    status,
-    createdBy,
-    search,
-    category,
-    cursor,
-    limit = 10,
-  } = queryDto;
-
-  // Updated cache key (removed page-based params)
-  const cacheKey = `${CACHE_KEYS.QUESTS}:${JSON.stringify({
-    status,
-    createdBy,
-    search,
-    category,
-    cursor,
-    limit,
-  })}`;
-
-  const cached =
-    await this.cacheService.get<PaginatedQuestsResponseDto>(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
-  const queryBuilder = this.questRepository.createQueryBuilder('quest');
-
-  // Filters
-  if (status) {
-    queryBuilder.andWhere('quest.status = :status', { status });
-  }
-
-  if (createdBy) {
-    queryBuilder.andWhere('quest.createdBy = :createdBy', {
+  async findAll(queryDto: QueryQuestsDto): Promise<PaginatedQuestsResponseDto> {
+    const {
+      status,
       createdBy,
-    });
+      search,
+      category,
+      cursor,
+      limit = 10,
+    } = queryDto;
+
+    // Updated cache key (removed page-based params)
+    const cacheKey = `${CACHE_KEYS.QUESTS}:${JSON.stringify({
+      status,
+      createdBy,
+      search,
+      category,
+      cursor,
+      limit,
+    })}`;
+
+    const cached =
+      await this.cacheService.get<PaginatedQuestsResponseDto>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const queryBuilder = this.questRepository.createQueryBuilder('quest');
+
+    // Filters
+    if (status) {
+      queryBuilder.andWhere('quest.status = :status', { status });
+    }
+
+    if (createdBy) {
+      queryBuilder.andWhere('quest.createdBy = :createdBy', {
+        createdBy,
+      });
+    }
+
+    // ⚠️ Force consistent ordering for cursor pagination
+    queryBuilder.orderBy('quest.createdAt', 'DESC');
+
+    // Cursor condition
+    if (cursor) {
+      queryBuilder.andWhere('quest.createdAt < :cursor', { cursor });
+    }
+
+    // Fetch one extra record to determine if there's a next page
+    queryBuilder.take(limit + 1);
+
+    const quests = await queryBuilder.getMany();
+
+    const hasNextPage = quests.length > limit;
+
+    const data = hasNextPage ? quests.slice(0, -1) : quests;
+
+    const nextCursor = hasNextPage
+      ? data[data.length - 1].createdAt.toISOString()
+      : undefined;
+
+    const result: PaginatedQuestsResponseDto = {
+      data: data.map((quest) => QuestResponseDto.fromEntity(quest)),
+      nextCursor,
+      limit,
+    };
+
+    await this.cacheService.set(cacheKey, result, CACHE_TTL.MEDIUM * 1000);
+
+    return result;
   }
-
-  // ⚠️ Force consistent ordering for cursor pagination
-  queryBuilder.orderBy('quest.createdAt', 'DESC');
-
-  // Cursor condition
-  if (cursor) {
-    queryBuilder.andWhere('quest.createdAt < :cursor', { cursor });
-  }
-
-  // Fetch one extra record to determine if there's a next page
-  queryBuilder.take(limit + 1);
-
-  const quests = await queryBuilder.getMany();
-
-  const hasNextPage = quests.length > limit;
-
-  const data = hasNextPage ? quests.slice(0, -1) : quests;
-
-  const nextCursor = hasNextPage
-    ? data[data.length - 1].createdAt.toISOString()
-    : undefined;
-
-  const result: PaginatedQuestsResponseDto = {
-    data: data.map((quest) => QuestResponseDto.fromEntity(quest)),
-    nextCursor,
-    limit,
-  };
-
-  await this.cacheService.set(
-    cacheKey,
-    result,
-    CACHE_TTL.MEDIUM * 1000,
-  );
-
-  return result;
-}
 
   async findOne(id: string): Promise<QuestResponseDto> {
     const cacheKey = `${CACHE_KEYS.QUEST_DETAIL}:${id}`;
 
     // Try to get from cache first
-    const cached =
-      await this.cacheService.get<QuestResponseDto>(cacheKey);
+    const cached = await this.cacheService.get<QuestResponseDto>(cacheKey);
     if (cached) {
       return cached;
     }
 
-    const quest = await this.questRepository.findOne({ 
+    const quest = await this.questRepository.findOne({
       where: { id },
       withDeleted: false,
     });
@@ -217,7 +212,7 @@ async findAll(queryDto: QueryQuestsDto): Promise<PaginatedQuestsResponseDto> {
     updateQuestDto: UpdateQuestDto,
     userAddress: string,
   ): Promise<QuestResponseDto> {
-    const quest = await this.questRepository.findOne({ 
+    const quest = await this.questRepository.findOne({
       where: { id },
       withDeleted: false,
     });
@@ -230,7 +225,10 @@ async findAll(queryDto: QueryQuestsDto): Promise<PaginatedQuestsResponseDto> {
       throw new ForbiddenException('You can only update quests you created');
     }
 
-    if (updateQuestDto.status && updateQuestDto.status !== quest.status) {
+    if (
+      updateQuestDto.status &&
+      (updateQuestDto.status as string) !== quest.status
+    ) {
       this.validateStatusTransition(quest.status, updateQuestDto.status);
     }
 
@@ -285,7 +283,7 @@ async findAll(queryDto: QueryQuestsDto): Promise<PaginatedQuestsResponseDto> {
   }
 
   async remove(id: string, userAddress: string): Promise<void> {
-    const quest = await this.questRepository.findOne({ 
+    const quest = await this.questRepository.findOne({
       where: { id },
       withDeleted: false,
     });
@@ -312,15 +310,12 @@ async findAll(queryDto: QueryQuestsDto): Promise<PaginatedQuestsResponseDto> {
     await this.cacheService.delete(`${CACHE_KEYS.QUEST_DETAIL}:${id}`);
   }
 
-  validateStatusTransition(
-    currentStatus: string,
-    newStatus: string,
-  ): void {
+  validateStatusTransition(currentStatus: string, newStatus: string): void {
     const validTransitions: Record<string, string[]> = {
-      'DRAFT': ['ACTIVE', 'ARCHIVED'],
-      'ACTIVE': ['COMPLETED', 'ARCHIVED'],
-      'COMPLETED': ['ARCHIVED'],
-      'ARCHIVED': [],
+      DRAFT: ['ACTIVE', 'ARCHIVED'],
+      ACTIVE: ['COMPLETED', 'ARCHIVED'],
+      COMPLETED: ['ARCHIVED'],
+      ARCHIVED: [],
     };
 
     const allowedStatuses = validTransitions[currentStatus];

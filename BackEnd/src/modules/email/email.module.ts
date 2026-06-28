@@ -7,10 +7,7 @@ import { JobsModule } from '../jobs/jobs.module';
 import emailConfig from '../../config/email.config';
 
 @Module({
-  imports: [
-    ConfigModule.forFeature(emailConfig),
-    JobsModule,
-  ],
+  imports: [ConfigModule.forFeature(emailConfig), JobsModule],
   controllers: [EmailController],
   providers: [EmailService, EmailTemplateEngine],
   exports: [EmailService],

@@ -5,30 +5,28 @@ import { QuotaService } from './quota.service';
 import { QuotaConfig } from './entities/quota-config.entity';
 import { QuotaUsage, QuotaResourceType } from './entities/quota-usage.entity';
 
-const makeConfig = (overrides: Partial<QuotaConfig> = {}): QuotaConfig =>
-  ({
-    id: 'cfg-1',
-    tenantId: 'TENANT_A',
-    maxQuestsPerPeriod: 5,
-    maxPayoutAmountPerPeriod: 1000,
-    maxSinglePayoutAmount: 200,
-    periodSeconds: 86400,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...overrides,
-  } as QuotaConfig);
+const makeConfig = (overrides: Partial<QuotaConfig> = {}): QuotaConfig => ({
+  id: 'cfg-1',
+  tenantId: 'TENANT_A',
+  maxQuestsPerPeriod: 5,
+  maxPayoutAmountPerPeriod: 1000,
+  maxSinglePayoutAmount: 200,
+  periodSeconds: 86400,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  ...overrides,
+});
 
-const makeUsage = (overrides: Partial<QuotaUsage> = {}): QuotaUsage =>
-  ({
-    id: 'usage-1',
-    tenantId: 'TENANT_A',
-    resourceType: QuotaResourceType.QUEST,
-    periodStart: new Date('2026-06-01T00:00:00.000Z'),
-    questCount: 0,
-    payoutAmount: 0,
-    createdAt: new Date(),
-    ...overrides,
-  } as QuotaUsage);
+const makeUsage = (overrides: Partial<QuotaUsage> = {}): QuotaUsage => ({
+  id: 'usage-1',
+  tenantId: 'TENANT_A',
+  resourceType: QuotaResourceType.QUEST,
+  periodStart: new Date('2026-06-01T00:00:00.000Z'),
+  questCount: 0,
+  payoutAmount: 0,
+  createdAt: new Date(),
+  ...overrides,
+});
 
 const mockConfigRepo = () => ({
   findOne: jest.fn(),
@@ -110,9 +108,14 @@ describe('QuotaService', () => {
       configRepo.create.mockReturnValue(newConfig);
       configRepo.save.mockResolvedValue(newConfig);
 
-      const result = await service.setConfig('TENANT_A', { maxQuestsPerPeriod: 10 });
+      const result = await service.setConfig('TENANT_A', {
+        maxQuestsPerPeriod: 10,
+      });
       expect(configRepo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ tenantId: 'TENANT_A', maxQuestsPerPeriod: 10 }),
+        expect.objectContaining({
+          tenantId: 'TENANT_A',
+          maxQuestsPerPeriod: 10,
+        }),
       );
       expect(result).toBe(newConfig);
     });
@@ -120,9 +123,14 @@ describe('QuotaService', () => {
     it('updates existing config', async () => {
       const existing = makeConfig();
       configRepo.findOne.mockResolvedValue(existing);
-      configRepo.save.mockResolvedValue({ ...existing, maxQuestsPerPeriod: 20 });
+      configRepo.save.mockResolvedValue({
+        ...existing,
+        maxQuestsPerPeriod: 20,
+      });
 
-      const result = await service.setConfig('TENANT_A', { maxQuestsPerPeriod: 20 });
+      const result = await service.setConfig('TENANT_A', {
+        maxQuestsPerPeriod: 20,
+      });
       expect(result.maxQuestsPerPeriod).toBe(20);
     });
   });
@@ -132,37 +140,53 @@ describe('QuotaService', () => {
   describe('enforceQuestCreationQuota', () => {
     it('does nothing when no config exists', async () => {
       configRepo.findOne.mockResolvedValue(null);
-      await expect(service.enforceQuestCreationQuota('TENANT_A')).resolves.toBeUndefined();
+      await expect(
+        service.enforceQuestCreationQuota('TENANT_A'),
+      ).resolves.toBeUndefined();
       expect(usageRepo.findOne).not.toHaveBeenCalled();
     });
 
     it('does nothing when maxQuestsPerPeriod is null (unlimited)', async () => {
-      configRepo.findOne.mockResolvedValue(makeConfig({ maxQuestsPerPeriod: null }));
-      await expect(service.enforceQuestCreationQuota('TENANT_A')).resolves.toBeUndefined();
+      configRepo.findOne.mockResolvedValue(
+        makeConfig({ maxQuestsPerPeriod: null }),
+      );
+      await expect(
+        service.enforceQuestCreationQuota('TENANT_A'),
+      ).resolves.toBeUndefined();
     });
 
     it('increments quest count when under limit', async () => {
-      configRepo.findOne.mockResolvedValue(makeConfig({ maxQuestsPerPeriod: 5 }));
+      configRepo.findOne.mockResolvedValue(
+        makeConfig({ maxQuestsPerPeriod: 5 }),
+      );
       const usage = makeUsage({ questCount: 3 });
       usageRepo.findOne.mockResolvedValue(usage);
       usageRepo.increment.mockResolvedValue(undefined);
 
       await service.enforceQuestCreationQuota('TENANT_A');
-      expect(usageRepo.increment).toHaveBeenCalledWith({ id: usage.id }, 'questCount', 1);
+      expect(usageRepo.increment).toHaveBeenCalledWith(
+        { id: usage.id },
+        'questCount',
+        1,
+      );
     });
 
     it('throws ForbiddenException when quest limit is reached', async () => {
-      configRepo.findOne.mockResolvedValue(makeConfig({ maxQuestsPerPeriod: 5 }));
+      configRepo.findOne.mockResolvedValue(
+        makeConfig({ maxQuestsPerPeriod: 5 }),
+      );
       usageRepo.findOne.mockResolvedValue(makeUsage({ questCount: 5 }));
 
-      await expect(service.enforceQuestCreationQuota('TENANT_A')).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.enforceQuestCreationQuota('TENANT_A'),
+      ).rejects.toThrow(ForbiddenException);
       expect(usageRepo.increment).not.toHaveBeenCalled();
     });
 
     it('creates a new usage record when none exists for the period', async () => {
-      configRepo.findOne.mockResolvedValue(makeConfig({ maxQuestsPerPeriod: 5 }));
+      configRepo.findOne.mockResolvedValue(
+        makeConfig({ maxQuestsPerPeriod: 5 }),
+      );
       usageRepo.findOne.mockResolvedValue(null);
       const newUsage = makeUsage({ questCount: 0 });
       usageRepo.create.mockReturnValue(newUsage);
@@ -180,11 +204,15 @@ describe('QuotaService', () => {
   describe('enforcePayoutQuota', () => {
     it('does nothing when no config exists', async () => {
       configRepo.findOne.mockResolvedValue(null);
-      await expect(service.enforcePayoutQuota('TENANT_A', 100)).resolves.toBeUndefined();
+      await expect(
+        service.enforcePayoutQuota('TENANT_A', 100),
+      ).resolves.toBeUndefined();
     });
 
     it('throws ForbiddenException when single payout exceeds limit', async () => {
-      configRepo.findOne.mockResolvedValue(makeConfig({ maxSinglePayoutAmount: 200 }));
+      configRepo.findOne.mockResolvedValue(
+        makeConfig({ maxSinglePayoutAmount: 200 }),
+      );
 
       await expect(service.enforcePayoutQuota('TENANT_A', 201)).rejects.toThrow(
         ForbiddenException,
@@ -193,16 +221,27 @@ describe('QuotaService', () => {
 
     it('does nothing when maxPayoutAmountPerPeriod is null (unlimited)', async () => {
       configRepo.findOne.mockResolvedValue(
-        makeConfig({ maxSinglePayoutAmount: null, maxPayoutAmountPerPeriod: null }),
+        makeConfig({
+          maxSinglePayoutAmount: null,
+          maxPayoutAmountPerPeriod: null,
+        }),
       );
-      await expect(service.enforcePayoutQuota('TENANT_A', 9999)).resolves.toBeUndefined();
+      await expect(
+        service.enforcePayoutQuota('TENANT_A', 9999),
+      ).resolves.toBeUndefined();
     });
 
     it('increments payout amount when under period limit', async () => {
       configRepo.findOne.mockResolvedValue(
-        makeConfig({ maxSinglePayoutAmount: null, maxPayoutAmountPerPeriod: 1000 }),
+        makeConfig({
+          maxSinglePayoutAmount: null,
+          maxPayoutAmountPerPeriod: 1000,
+        }),
       );
-      const usage = makeUsage({ resourceType: QuotaResourceType.PAYOUT, payoutAmount: 500 });
+      const usage = makeUsage({
+        resourceType: QuotaResourceType.PAYOUT,
+        payoutAmount: 500,
+      });
       usageRepo.findOne.mockResolvedValue(usage);
 
       const qb = {
@@ -219,10 +258,16 @@ describe('QuotaService', () => {
 
     it('throws ForbiddenException when period payout limit would be exceeded', async () => {
       configRepo.findOne.mockResolvedValue(
-        makeConfig({ maxSinglePayoutAmount: null, maxPayoutAmountPerPeriod: 1000 }),
+        makeConfig({
+          maxSinglePayoutAmount: null,
+          maxPayoutAmountPerPeriod: 1000,
+        }),
       );
       usageRepo.findOne.mockResolvedValue(
-        makeUsage({ resourceType: QuotaResourceType.PAYOUT, payoutAmount: 800 }),
+        makeUsage({
+          resourceType: QuotaResourceType.PAYOUT,
+          payoutAmount: 800,
+        }),
       );
 
       await expect(service.enforcePayoutQuota('TENANT_A', 300)).rejects.toThrow(
@@ -232,9 +277,15 @@ describe('QuotaService', () => {
 
     it('allows payout exactly at the period limit', async () => {
       configRepo.findOne.mockResolvedValue(
-        makeConfig({ maxSinglePayoutAmount: null, maxPayoutAmountPerPeriod: 1000 }),
+        makeConfig({
+          maxSinglePayoutAmount: null,
+          maxPayoutAmountPerPeriod: 1000,
+        }),
       );
-      const usage = makeUsage({ resourceType: QuotaResourceType.PAYOUT, payoutAmount: 700 });
+      const usage = makeUsage({
+        resourceType: QuotaResourceType.PAYOUT,
+        payoutAmount: 700,
+      });
       usageRepo.findOne.mockResolvedValue(usage);
 
       const qb = {

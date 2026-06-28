@@ -7,14 +7,11 @@ import { QuestDifficulty } from '@/lib/types/quest';
 import { useFormatter } from '@/lib/hooks/useFormatter';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 
-
-
 interface QuestCardProps {
   quest: Quest;
   onClick?: (quest: Quest) => void;
   progress?: number;
 }
-
 
 // ─── Removed: formatTimeRemaining() ───────────────────────────────────────────
 // Previously a hand-rolled English-only function that:
@@ -37,7 +34,6 @@ function isDeadlineUrgent(deadline?: string | null): boolean {
   const diffDays = (deadlineMs - Date.now()) / (1000 * 60 * 60 * 24);
   return diffDays >= 0 && diffDays <= 3;
 }
-
 
 const difficultyStyles: Record<QuestDifficulty, string> = {
   [QuestDifficulty.EASY]: 'quest-card__diff--easy',
@@ -72,19 +68,15 @@ function avatarColor(name: string): string {
 
 export const QuestCard = memo(
   ({ quest, onClick, progress }: QuestCardProps) => {
-
     // useFormatter reads navigator.language once and returns pre-bound,
     // memoised formatting functions — no locale prop drilling needed.
     const { deadline, reward, compactReward } = useFormatter();
 
     // Localised deadline label: "Ends in 3 days" | "Expired" | null
-    const timeLabel = quest.deadline
-      ? deadline(quest.deadline)
-      : null;
+    const timeLabel = quest.deadline ? deadline(quest.deadline) : null;
 
     // Urgency check is now locale-independent (raw ms comparison)
     const isUrgent = isDeadlineUrgent(quest.deadline);
-
 
     const handleClick = () => onClick?.(quest);
 
@@ -181,7 +173,6 @@ export const QuestCard = memo(
 
         <div className="quest-card__meta" aria-hidden="true">
           <div className="quest-card__rewards">
-
             {/* ── XLM reward badge ─────────────────────────────────────────
                 Before: {quest.rewardAmount} {quest.rewardAsset}
                   → No number formatting, no locale awareness

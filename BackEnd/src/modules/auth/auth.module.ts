@@ -15,25 +15,27 @@ import { RefreshToken } from './entities/refresh-token.entity';
       session: false,
     }),
     JwtModule.registerAsync({
-       imports: [ConfigModule],
-       useFactory: async (configService: ConfigService) => {
-         const privateKey = configService.get<string>('JWT_PRIVATE_KEY');
-         if (!privateKey) {
-           throw new Error('JWT_PRIVATE_KEY is not defined in environment variables');
-         }
-         return {
-           privateKey,
-           signOptions: {
-             expiresIn: configService.get<string>(
-               'JWT_ACCESS_TOKEN_EXPIRATION',
-               '15m',
-             ),
-             algorithm: 'RS256',
-           },
-         } as any;
-       },
-       inject: [ConfigService],
-     }),
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const privateKey = configService.get<string>('JWT_PRIVATE_KEY');
+        if (!privateKey) {
+          throw new Error(
+            'JWT_PRIVATE_KEY is not defined in environment variables',
+          );
+        }
+        return {
+          privateKey,
+          signOptions: {
+            expiresIn: configService.get<string>(
+              'JWT_ACCESS_TOKEN_EXPIRATION',
+              '15m',
+            ),
+            algorithm: 'RS256',
+          },
+        } as any;
+      },
+      inject: [ConfigService],
+    }),
     TypeOrmModule.forFeature([RefreshToken]),
   ],
   controllers: [AuthController],
