@@ -58,7 +58,7 @@ import { EventsModule } from './events/events.module';
     MultiSigModule,
     NotificationsModule,
     PayoutsModule,
-    PostmortemsModule,
+    ...(process.env.NODE_ENV !== 'production' ? [PostmortemsModule] : []),
     QueryMonitoringModule,
     QuestsModule,
     QuotaModule,
