@@ -103,6 +103,8 @@ pub enum DataKey {
     ClawbackPending(Symbol, Address),
     /// Category index keyed by a numeric category, storing quest ids in insertion order
     QuestCategory(u32),
+    /// Default expiry grace period applied when a quest does not define one
+    DefaultQuestGracePeriodSeconds,
 }
 
 //================================================================================
@@ -1094,6 +1096,19 @@ pub fn set_config(env: &Env, config: &Vec<(String, String)>) {
         .set(&DataKey::ContractConfig, config);
 }
 
+pub fn get_default_quest_grace_period_seconds(env: &Env) -> u64 {
+    env.storage()
+        .instance()
+        .get(&DataKey::DefaultQuestGracePeriodSeconds)
+        .unwrap_or(validation::MIN_EXPIRY_BUFFER)
+}
+
+pub fn set_default_quest_grace_period_seconds(env: &Env, grace_period_seconds: u64) {
+    env.storage()
+        .instance()
+        .set(&DataKey::DefaultQuestGracePeriodSeconds, &grace_period_seconds);
+}
+
 //================================================================================
 // Quest Index (for query/filtering support)
 //================================================================================
@@ -1511,9 +1526,10 @@ mod layout_tests {
         "CreatorWhitelist",
         "ClawbackPending",
         "QuestCategory",
+        "DefaultQuestGracePeriodSeconds",
     ];
 
-    const EXPECTED_VARIANT_COUNT: usize = 46;
+    const EXPECTED_VARIANT_COUNT: usize = 47;
 
     /// One sample instance per `DataKey` variant for layout audits.
     fn all_data_keys(env: &Env) -> Vec<DataKey> {
@@ -1568,6 +1584,7 @@ mod layout_tests {
         keys.push_back(DataKey::CreatorWhitelist(addr.clone()));
         keys.push_back(DataKey::ClawbackPending(quest_id.clone(), addr.clone()));
         keys.push_back(DataKey::QuestCategory(1));
+        keys.push_back(DataKey::DefaultQuestGracePeriodSeconds);
         keys
     }
 
