@@ -1103,7 +1103,7 @@ pub fn get_default_quest_grace_period_seconds(env: &Env) -> u64 {
         .unwrap_or(validation::MIN_EXPIRY_BUFFER)
 }
 
-pub fn set_default_quest_grace_period_seconds(env: &Env, grace_period_seconds: u64) {
+pub fn set_quest_grace_period(env: &Env, grace_period_seconds: u64) {
     env.storage()
         .instance()
         .set(&DataKey::DefaultQuestGracePeriodSeconds, &grace_period_seconds);

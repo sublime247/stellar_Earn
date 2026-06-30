@@ -369,12 +369,12 @@ impl EarnQuestContract {
     ///
     /// Admins can update this default, and quests with a custom
     /// `grace_period_seconds` continue using their own value.
-    pub fn set_default_quest_grace_period_seconds(
+    pub fn set_quest_grace_period(
         env: Env,
         caller: Address,
         grace_period_seconds: u64,
     ) -> Result<(), Error> {
-        admin::set_default_quest_grace_period_seconds(&env, &caller, grace_period_seconds)
+        admin::set_quest_grace_period(&env, &caller, grace_period_seconds)
     }
 
     /// Returns the global default quest expiry grace period in seconds.

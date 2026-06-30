@@ -193,13 +193,13 @@ pub fn set_min_creator_level(env: &Env, caller: &Address, level: u32) -> Result<
 ///
 /// Quests with an explicit `grace_period_seconds` keep using their per-quest
 /// value; this default only applies when the quest does not define one.
-pub fn set_default_quest_grace_period_seconds(
+pub fn set_quest_grace_period(
     env: &Env,
     caller: &Address,
     grace_period_seconds: u64,
 ) -> Result<(), Error> {
     require_admin(env, caller)?;
-    storage::set_default_quest_grace_period_seconds(env, grace_period_seconds);
+    storage::set_quest_grace_period(env, grace_period_seconds);
     Ok(())
 }
 
