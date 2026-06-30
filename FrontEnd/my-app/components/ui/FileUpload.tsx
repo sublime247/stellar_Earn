@@ -286,9 +286,7 @@ export function FileUpload({
               />
             </svg>
             <p className="mb-1 text-sm text-zinc-600 dark:text-zinc-400">
-              <span className="font-medium text-primary">
-                Click to upload
-              </span>{' '}
+              <span className="font-medium text-primary">Click to upload</span>{' '}
               or drag and drop
             </p>
             <p className="text-xs text-zinc-500 dark:text-zinc-500">

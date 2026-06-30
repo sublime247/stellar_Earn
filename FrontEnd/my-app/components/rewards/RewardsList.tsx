@@ -67,9 +67,7 @@ export function RewardsList() {
 
   const SortIcon = ({ field }: { field: SortField }) =>
     sortField !== field ? null : (
-      <span className="ml-1 text-primary">
-        {sortDir === 'asc' ? '↑' : '↓'}
-      </span>
+      <span className="ml-1 text-primary">{sortDir === 'asc' ? '↑' : '↓'}</span>
     );
 
   if (loading) {

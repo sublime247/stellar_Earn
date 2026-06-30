@@ -115,10 +115,7 @@ export function RewardDisplay({
             <div className="text-sm text-zinc-600 dark:text-zinc-400">
               Experience Points
             </div>
-            <div
-              className="text-2xl font-bold text-primary"
-              aria-hidden="true"
-            >
+            <div className="text-2xl font-bold text-primary" aria-hidden="true">
               +{formattedXpReward}
             </div>
           </div>
