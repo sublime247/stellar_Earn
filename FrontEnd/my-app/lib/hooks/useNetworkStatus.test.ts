@@ -123,7 +123,7 @@ describe('useNetworkStatus', () => {
   it('fires an API health probe immediately when online', async () => {
     renderHook(() => useNetworkStatus());
     await act(async () => {
-      await vi.runAllTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
     });
     expect(mockGet).toHaveBeenCalledWith(
       '/health',
@@ -135,7 +135,7 @@ describe('useNetworkStatus', () => {
     mockGet.mockResolvedValue({ data: { status: 'ok' } });
     renderHook(() => useNetworkStatus());
     await act(async () => {
-      await vi.runAllTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
     });
     expect(mockState.setApiReachable).toHaveBeenCalledWith(true);
   });
@@ -144,7 +144,7 @@ describe('useNetworkStatus', () => {
     mockGet.mockRejectedValue(new Error('Network Error'));
     renderHook(() => useNetworkStatus());
     await act(async () => {
-      await vi.runAllTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
     });
     expect(mockState.setApiReachable).toHaveBeenCalledWith(false);
   });
@@ -154,7 +154,7 @@ describe('useNetworkStatus', () => {
     mockGet.mockClear();
     renderHook(() => useNetworkStatus());
     await act(async () => {
-      await vi.runAllTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
     });
     // Periodic effect only runs when storeIsOnline is true.
     expect(mockGet).not.toHaveBeenCalled();

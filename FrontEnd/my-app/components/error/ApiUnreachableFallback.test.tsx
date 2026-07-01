@@ -43,14 +43,18 @@ describe('ApiUnreachableFallback', () => {
 
   it('renders a retry button with the correct label', () => {
     render(<ApiUnreachableFallback onRetry={() => {}} />);
-    const btn = screen.getByRole('button', { name: /retry server connection/i });
+    const btn = screen.getByRole('button', {
+      name: /retry server connection/i,
+    });
     expect(btn).toBeDefined();
   });
 
   it('calls onRetry when the button is clicked', () => {
     const onRetry = vi.fn();
     render(<ApiUnreachableFallback onRetry={onRetry} />);
-    fireEvent.click(screen.getByRole('button', { name: /retry server connection/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /retry server connection/i })
+    );
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
