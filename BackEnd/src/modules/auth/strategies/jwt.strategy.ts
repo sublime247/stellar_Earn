@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
-import { verify, type VerifyErrors } from 'jsonwebtoken';
+import { verify } from 'jsonwebtoken';
 import { AuthService } from '../auth.service';
 import { getJwtPublicKeys } from '../../../common/utils/jwt-keys';
 
@@ -63,12 +63,12 @@ export class JwtStrategy extends Strategy {
               verify(token, key, { algorithms: ['RS256'] });
               done(null, key);
               return;
-            } catch (error) {
+            } catch {
               // try next key
             }
           }
 
-          done(new Error('Invalid token signature') as VerifyErrors);
+          done(new Error('Invalid token signature'));
         },
       },
       async (payload: JwtPayload) => {

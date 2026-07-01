@@ -47,7 +47,7 @@ export class WsAuthGuard implements CanActivate {
             algorithms: ['RS256'],
           });
           break;
-        } catch (error) {
+        } catch {
           // try next key
         }
       }
@@ -64,9 +64,8 @@ export class WsAuthGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      this.logger.warn(
-        `WS auth failed for socket ${client.id}: ${error.message}`,
-      );
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`WS auth failed for socket ${client.id}: ${message}`);
       throw new WsException('Unauthorized');
     }
   }
