@@ -39,6 +39,7 @@ import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { WebsocketModule } from './modules/websocket/websocket.module';
 import { TraceInterceptor } from './modules/trace/trace.interceptor';
 import { EventsModule } from './events/events.module';
+import { ProcessResourceModule } from './modules/process-resource/process-resource.module';
 import { shouldInitializeDatabaseConnection } from './config/database.config';
 
 const typeOrmImports = shouldInitializeDatabaseConnection()
@@ -93,6 +94,7 @@ const dataSourceProvider = shouldInitializeDatabaseConnection()
     UsersModule,
     WebhooksModule,
     WebsocketModule,
+    ProcessResourceModule,
   ],
   controllers: [AppController],
   providers: [
