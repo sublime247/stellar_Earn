@@ -1656,7 +1656,7 @@ mod layout_tests {
         assert_eq!(all_data_keys(&env).len() as usize, VARIANT_NAMES.len());
         assert_eq!(VARIANT_NAMES.len(), EXPECTED_VARIANT_COUNT);
     }
-}
+
 
 //================================================================================
 // Clawback Storage (2-of-2 SuperAdmin approval)
