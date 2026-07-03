@@ -35,7 +35,7 @@ describe('Profile API Integration Tests', () => {
           { message: 'Internal server error' },
           { status: 500 },
         );
-      })
+      }),
     );
 
     await expect(fetchUserProfile(TEST_ADDRESS)).rejects.toThrow();
