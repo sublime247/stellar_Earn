@@ -5,6 +5,7 @@ mod dispute;
 pub mod errors;
 mod escrow;
 mod events;
+pub mod gas_budget;
 mod init;
 mod oracle;
 mod payout;
@@ -362,6 +363,23 @@ impl EarnQuestContract {
         creator.require_auth();
         validation::validate_array_length(quests.len(), validation::MAX_BATCH_QUEST_REGISTRATION)?;
         quest::register_quests_batch(&env, &creator, &quests)
+    }
+
+    /// Sets the global default quest expiry grace period in seconds.
+    ///
+    /// Admins can update this default, and quests with a custom
+    /// `grace_period_seconds` continue using their own value.
+    pub fn set_quest_grace_period(
+        env: Env,
+        caller: Address,
+        grace_period_seconds: u64,
+    ) -> Result<(), Error> {
+        admin::set_quest_grace_period(&env, &caller, grace_period_seconds)
+    }
+
+    /// Returns the global default quest expiry grace period in seconds.
+    pub fn get_default_grace_period(env: Env) -> u64 {
+        storage::get_default_grace_period(&env)
     }
 
     /// Pauses an individual quest (Admin only).
@@ -1060,6 +1078,15 @@ impl EarnQuestContract {
     /// Sets the timelock duration for unpausing (Admin only).
     pub fn set_unpause_timelock(env: Env, caller: Address, seconds: u64) -> Result<(), Error> {
         security::set_unpause_timelock(&env, &caller, seconds)
+    }
+
+    /// Sets the minimum seconds between unpause and the next pause (SuperAdmin only).
+    pub fn set_pause_cooldown_seconds(
+        env: Env,
+        caller: Address,
+        seconds: u64,
+    ) -> Result<(), Error> {
+        security::set_pause_cooldown_seconds(&env, &caller, seconds)
     }
 
     //================================================================================
