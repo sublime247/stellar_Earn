@@ -132,39 +132,27 @@ export const handlers = [
   // Get achievements
   http.get(
     `${API_BASE_URL}/api/v1/profiles/:address/achievements`,
-    achievementsResolver,
+    achievementsResolver
   ),
-  http.get(
-    '/api/v1/profiles/:address/achievements',
-    achievementsResolver,
-  ),
+  http.get('/api/v1/profiles/:address/achievements', achievementsResolver),
 
   // Get activities
   http.get(
     `${API_BASE_URL}/api/v1/profiles/:address/activities`,
-    activitiesResolver,
+    activitiesResolver
   ),
-  http.get(
-    '/api/v1/profiles/:address/activities',
-    activitiesResolver,
-  ),
+  http.get('/api/v1/profiles/:address/activities', activitiesResolver),
 
   // Follow / unfollow
-  http.post(
-    `${API_BASE_URL}/api/v1/profiles/:address/follow`,
-    followResolver,
-  ),
+  http.post(`${API_BASE_URL}/api/v1/profiles/:address/follow`, followResolver),
   http.post('/api/v1/profiles/:address/follow', followResolver),
   http.post(
     `${API_BASE_URL}/api/v1/profiles/:address/unfollow`,
-    followResolver,
+    followResolver
   ),
   http.post('/api/v1/profiles/:address/unfollow', followResolver),
 
   // Update profile
-  http.patch(
-    `${API_BASE_URL}/api/v1/profiles/:address`,
-    updateProfileResolver,
-  ),
+  http.patch(`${API_BASE_URL}/api/v1/profiles/:address`, updateProfileResolver),
   http.patch('/api/v1/profiles/:address', updateProfileResolver),
 ];
