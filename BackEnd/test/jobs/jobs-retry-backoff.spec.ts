@@ -147,9 +147,9 @@ describe('JobsService.addJob() – option merging', () => {
 
   it('throws when the queue does not exist', async () => {
     const { service } = buildService();
-    await expect(
-      service.addJob('nonexistent-queue', {}),
-    ).rejects.toThrow('Queue nonexistent-queue not found');
+    await expect(service.addJob('nonexistent-queue', {})).rejects.toThrow(
+      'Queue nonexistent-queue not found',
+    );
   });
 
   it('passes extra caller opts through (e.g. jobId)', async () => {
@@ -228,7 +228,7 @@ describe('Worker failed handler – DLQ routing', () => {
       // lightweight spy approach: we create a fake worker and patch it.
       const listenerRef: { fn?: (job: any, err: Error) => void } = {};
 
-      const fakeWorker = {
+      const _fakeWorker = {
         name: 'test-worker',
         on: jest.fn((event: string, fn: any) => {
           if (event === 'failed') listenerRef.fn = fn;
@@ -239,7 +239,7 @@ describe('Worker failed handler – DLQ routing', () => {
 
       // Patch Worker constructor to return our fake worker
       const originalCreateWorker = (service as any).createWorker.bind(service);
-      (service as any).createWorker = (name: string, processor: any) => {
+      (service as any).createWorker = (name: string, _processor: any) => {
         // Call original but intercept the Worker by monkey-patching workers array
         const originalWorkers = service['workers'];
         service['workers'] = [];
@@ -270,9 +270,9 @@ describe('Worker failed handler – DLQ routing', () => {
       const attemptsExhausted = (job.attemptsMade ?? 0) >= maxAttempts;
       const notRetryable =
         jobTypeFromData && err?.message
-          ? JOB_RETRY_POLICIES[jobTypeFromData]?.nonRetryableErrors.some((p) =>
+          ? (JOB_RETRY_POLICIES[jobTypeFromData]?.nonRetryableErrors.some((p) =>
               err.message.includes(p),
-            ) ?? false
+            ) ?? false)
           : false;
 
       if (attemptsExhausted || notRetryable) {
