@@ -43,19 +43,31 @@ describe('JobIdempotencyService', () => {
 
   describe('buildPayoutJobKey', () => {
     it('should build the canonical key for a payout job', () => {
-      const key = service.buildPayoutJobKey('payout-uuid-123', JobType.PAYOUT_PROCESS);
+      const key = service.buildPayoutJobKey(
+        'payout-uuid-123',
+        JobType.PAYOUT_PROCESS,
+      );
       expect(key).toBe('payout-job:payout-uuid-123:payout:process');
     });
 
     it('should build different keys for different job types', () => {
-      const processKey = service.buildPayoutJobKey('id', JobType.PAYOUT_PROCESS);
+      const processKey = service.buildPayoutJobKey(
+        'id',
+        JobType.PAYOUT_PROCESS,
+      );
       const settleKey = service.buildPayoutJobKey('id', JobType.PAYOUT_SETTLE);
       expect(processKey).not.toEqual(settleKey);
     });
 
     it('should build different keys for different payoutIds', () => {
-      const key1 = service.buildPayoutJobKey('payout-1', JobType.PAYOUT_PROCESS);
-      const key2 = service.buildPayoutJobKey('payout-2', JobType.PAYOUT_PROCESS);
+      const key1 = service.buildPayoutJobKey(
+        'payout-1',
+        JobType.PAYOUT_PROCESS,
+      );
+      const key2 = service.buildPayoutJobKey(
+        'payout-2',
+        JobType.PAYOUT_PROCESS,
+      );
       expect(key1).not.toEqual(key2);
     });
   });
@@ -85,7 +97,10 @@ describe('JobIdempotencyService', () => {
 
   describe('checkAndLock — already completed', () => {
     it('should return alreadyProcessed=true with cached result when record has completedAt', async () => {
-      const cachedResult = { success: true, data: { transactionHash: 'tx_abc' } };
+      const cachedResult = {
+        success: true,
+        data: { transactionHash: 'tx_abc' },
+      };
       idempotencyService.findByKey.mockResolvedValue({
         id: 'rec-1',
         key: 'some-key',

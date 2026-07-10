@@ -72,13 +72,10 @@ export class JobIdempotencyService {
    * @returns               {@link JobIdempotencyCheck} — see interface docs.
    */
   async checkAndLock(idempotencyKey: string): Promise<JobIdempotencyCheck> {
-    this.logger.debug(
-      `Checking job idempotency key: ${idempotencyKey}`,
-    );
+    this.logger.debug(`Checking job idempotency key: ${idempotencyKey}`);
 
     // ── 1. Look for an existing (non-expired) record ─────────────────────
-    const existing =
-      await this.idempotencyService.findByKey(idempotencyKey);
+    const existing = await this.idempotencyService.findByKey(idempotencyKey);
 
     if (existing) {
       if (existing.completedAt) {
@@ -112,9 +109,9 @@ export class JobIdempotencyService {
     const acquireResult = await this.idempotencyService.tryAcquire(
       idempotencyKey,
       fingerprint,
-      'JOB',        // requestMethod — repurposed as "origin" discriminator
+      'JOB', // requestMethod — repurposed as "origin" discriminator
       idempotencyKey, // requestPath  — stores the key itself for traceability
-      '',           // bodyHash       — no HTTP body for job payloads
+      '', // bodyHash       — no HTTP body for job payloads
     );
 
     if (!acquireResult.acquired) {
@@ -154,9 +151,7 @@ export class JobIdempotencyService {
     // HTTP status code 200 is used as a sentinel for "success" in the
     // existing IdempotencyService schema.
     await this.idempotencyService.complete(idempotencyKey, 200, result);
-    this.logger.debug(
-      `Job idempotency key marked complete: ${idempotencyKey}`,
-    );
+    this.logger.debug(`Job idempotency key marked complete: ${idempotencyKey}`);
   }
 
   /**

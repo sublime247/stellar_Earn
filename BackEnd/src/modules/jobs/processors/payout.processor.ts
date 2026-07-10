@@ -60,11 +60,13 @@ export class PayoutProcessor {
           `returning cached result`,
       );
       // Return the previously recorded result directly.
-      return (idempotencyCheck.result as unknown as JobResult) ?? {
-        success: true,
-        data: { payoutId, cachedAt: new Date(), alreadyProcessed: true },
-        duration: 0,
-      };
+      return (
+        (idempotencyCheck.result as unknown as JobResult) ?? {
+          success: true,
+          data: { payoutId, cachedAt: new Date(), alreadyProcessed: true },
+          duration: 0,
+        }
+      );
     }
 
     if (idempotencyCheck.locked) {

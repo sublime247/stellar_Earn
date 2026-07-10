@@ -7,6 +7,7 @@ import {
 import { Queue, Worker, Job } from 'bullmq';
 import { QUEUES, DEFAULT_JOB_OPTIONS } from './jobs.constants';
 import { DataExportProcessor } from './processors/export.processor';
+import { PayoutProcessor } from './processors/payout.processor';
 import {
   TracingService,
   TraceContext,
@@ -36,11 +37,13 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
   private queues: Record<string, Queue> = {};
   private workers: Worker[] = [];
   private emailProcessor:
-    ((messageId: string, dto: any) => Promise<void>) | null = null;
+    | ((messageId: string, dto: any) => Promise<void>)
+    | null = null;
 
   constructor(
     private readonly tracing: TracingService,
     private readonly dataExportProcessor?: DataExportProcessor,
+    private readonly payoutProcessor?: PayoutProcessor,
   ) {}
 
   registerEmailProcessor(
