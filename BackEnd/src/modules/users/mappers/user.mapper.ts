@@ -1,9 +1,15 @@
 import { User } from '../entities/user.entity';
-import { UserResponseDto, LeaderboardUserDto, UserStatsResponseDto, UserQuestDto } from '../dto/user-response.dto';
+import {
+  UserResponseDto,
+  LeaderboardUserDto,
+  UserStatsResponseDto,
+  UserQuestDto,
+} from '../dto/user-response.dto';
+import { UserRole } from '../../auth/enums/user-role.enum';
 
 /**
  * User Mapper
- * 
+ *
  * Explicit mapper functions to convert between User entities and DTOs.
  * This provides a clean separation of concerns and makes mapping logic testable.
  */
@@ -16,10 +22,10 @@ export class UserMapper {
   static toDto(user: User): UserResponseDto {
     const dto = new UserResponseDto();
     dto.id = user.id;
-    dto.stellarAddress = user.stellarAddress;
+    dto.stellarAddress = user.stellarAddress ?? '';
     dto.username = user.username;
     dto.email = user.email;
-    dto.role = user.role;
+    dto.role = user.role as unknown as UserRole;
     dto.xp = user.xp;
     dto.level = user.level;
     dto.createdAt = user.createdAt;
@@ -33,7 +39,7 @@ export class UserMapper {
    * @returns Array of user response DTOs
    */
   static toDtoArray(users: User[]): UserResponseDto[] {
-    return users.map(user => this.toDto(user));
+    return users.map((user) => this.toDto(user));
   }
 
   /**
@@ -45,7 +51,7 @@ export class UserMapper {
   static toLeaderboardDto(user: User, rank: number): LeaderboardUserDto {
     const dto = new LeaderboardUserDto();
     dto.id = user.id;
-    dto.stellarAddress = user.stellarAddress;
+    dto.stellarAddress = user.stellarAddress ?? '';
     dto.username = user.username;
     dto.xp = user.xp;
     dto.level = user.level;

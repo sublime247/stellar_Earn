@@ -9,7 +9,6 @@ import {
 import { QuestsService } from './quests.service';
 import { Quest } from './entities/quest.entity';
 import * as questDto from './dto';
-import { QuestResponseDto } from './dto';
 import { QuestMapper } from './mappers/quest.mapper';
 import { CacheService } from '../cache/cache.service';
 import { ModerationService } from '../moderation/moderation.service';

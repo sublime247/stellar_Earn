@@ -3,7 +3,7 @@ import type { UserProfile, ProfileStats } from '../types/profile';
 
 /**
  * Profile Mapper
- * 
+ *
  * Explicit mapper functions to convert between API DTOs and UI domain models.
  * This provides a clean separation of concerns and makes mapping logic testable.
  */

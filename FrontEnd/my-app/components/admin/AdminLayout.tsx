@@ -26,11 +26,17 @@ export default function AdminLayout({ children, user }: AdminLayoutProps) {
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50">
       <header className="flex h-16 items-center justify-between border-b border-zinc-200 bg-white px-4 dark:border-zinc-800 dark:bg-zinc-950 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4">
-          <span className="font-bold text-lg tracking-tight">StellarEarn Admin</span>
+          <span className="font-bold text-lg tracking-tight">
+            StellarEarn Admin
+          </span>
         </div>
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          {user && <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{user.username}</span>}
+          {user && (
+            <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+              {user.username}
+            </span>
+          )}
         </div>
       </header>
 
@@ -57,9 +63,7 @@ export default function AdminLayout({ children, user }: AdminLayoutProps) {
           </nav>
         </aside>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          {children}
-        </main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

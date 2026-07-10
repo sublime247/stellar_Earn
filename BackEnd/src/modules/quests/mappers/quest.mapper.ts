@@ -1,10 +1,9 @@
 import { Quest } from '../entities/quest.entity';
 import { QuestResponseDto } from '../dto/quest-response.dto';
-import { QuestDifficulty } from '../enums/quest-difficulty.enum';
 
 /**
  * Quest Mapper
- * 
+ *
  * Explicit mapper functions to convert between Quest entities and DTOs.
  * This provides a clean separation of concerns and makes mapping logic testable.
  */
@@ -34,7 +33,7 @@ export class QuestMapper {
    * @returns Array of quest response DTOs
    */
   static toDtoArray(quests: Quest[]): QuestResponseDto[] {
-    return quests.map(quest => this.toDto(quest));
+    return quests.map((quest) => this.toDto(quest));
   }
 
   /**

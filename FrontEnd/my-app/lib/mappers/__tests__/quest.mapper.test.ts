@@ -82,7 +82,12 @@ describe('QuestMapper', () => {
     it('should convert array of UI Quest domain models to API QuestResponse', () => {
       const domainQuests: Quest[] = [
         { ...mockApiQuest, status: 'Active', difficulty: 'beginner' },
-        { ...mockApiQuest, id: '456', status: 'Active', difficulty: 'intermediate' },
+        {
+          ...mockApiQuest,
+          id: '456',
+          status: 'Active',
+          difficulty: 'intermediate',
+        },
       ];
 
       const result = QuestMapper.toApiArray(domainQuests);

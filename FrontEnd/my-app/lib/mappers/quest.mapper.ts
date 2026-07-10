@@ -3,7 +3,7 @@ import type { Quest } from '../types/quest';
 
 /**
  * Quest Mapper
- * 
+ *
  * Explicit mapper functions to convert between API DTOs and UI domain models.
  * This provides a clean separation of concerns and makes mapping logic testable.
  */
@@ -27,7 +27,7 @@ export class QuestMapper {
    * @returns Array of UI quest domain models
    */
   static toDomainArray(apiQuests: QuestResponse[]): Quest[] {
-    return apiQuests.map(quest => this.toDomain(quest));
+    return apiQuests.map((quest) => this.toDomain(quest));
   }
 
   /**
@@ -49,6 +49,6 @@ export class QuestMapper {
    * @returns Array of API quest responses
    */
   static toApiArray(domainQuests: Quest[]): QuestResponse[] {
-    return domainQuests.map(quest => this.toApi(quest));
+    return domainQuests.map((quest) => this.toApi(quest));
   }
 }

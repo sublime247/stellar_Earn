@@ -3,7 +3,7 @@ import type { Submission } from '../types/submission';
 
 /**
  * Submission Mapper
- * 
+ *
  * Explicit mapper functions to convert between API DTOs and UI domain models.
  * This provides a clean separation of concerns and makes mapping logic testable.
  */
@@ -38,7 +38,7 @@ export class SubmissionMapper {
    * @returns Array of UI submission domain models
    */
   static toDomainArray(apiSubmissions: SubmissionResponse[]): Submission[] {
-    return apiSubmissions.map(submission => this.toDomain(submission));
+    return apiSubmissions.map((submission) => this.toDomain(submission));
   }
 
   /**
@@ -71,6 +71,6 @@ export class SubmissionMapper {
    * @returns Array of API submission responses
    */
   static toApiArray(domainSubmissions: Submission[]): SubmissionResponse[] {
-    return domainSubmissions.map(submission => this.toApi(submission));
+    return domainSubmissions.map((submission) => this.toApi(submission));
   }
 }
