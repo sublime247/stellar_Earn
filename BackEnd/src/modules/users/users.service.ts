@@ -91,7 +91,7 @@ export class UsersService {
 
   async create(dto: Partial<User>): Promise<User> {
     const user = this.usersRepository.create(dto as any);
-    return this.usersRepository.save(user);
+    return (await this.usersRepository.save(user)) as User;
   }
 
   /**
