@@ -3,6 +3,7 @@ import { Job } from 'bullmq';
 import { PayoutProcessPayload, JobResult, JobType } from '../job.types';
 import { JobLogService } from '../services/job-log.service';
 import { JobIdempotencyService } from '../services/job-idempotency.service';
+import { StellarService } from '../../stellar/stellar.service';
 
 /**
  * Payout Processor
@@ -33,6 +34,7 @@ export class PayoutProcessor {
   constructor(
     private readonly jobLogService: JobLogService,
     private readonly jobIdempotencyService: JobIdempotencyService,
+    private readonly stellarService: StellarService,
   ) {}
 
   /**
@@ -110,16 +112,12 @@ export class PayoutProcessor {
 
       await job.updateProgress(50);
 
-      // TODO: Integrate with Stellar SDK to execute transaction
-      // This would involve:
-      // 1. Load sender account from Stellar network
-      // 2. Create payment transaction
-      // 3. Sign transaction
-      // 4. Submit to network
-      // 5. Wait for confirmation
-
-      // Simulate payout processing (replace with real Stellar SDK call)
-      const transactionHash = `tx_${payoutId.substring(0, 8)}_${organizationId.substring(0, 4)}`;
+      // Execute the Stellar payment transaction
+      const stellarResult = await this.stellarService.sendPayment(
+        recipientAddress,
+        amount,
+      );
+      const transactionHash = stellarResult.transactionHash;
 
       await job.updateProgress(75);
 

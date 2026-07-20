@@ -585,4 +585,58 @@ export class StellarService implements OnModuleInit {
   getNetworkPassphrase(): string {
     return this.networkPassphrase;
   }
+
+  /**
+   * Send a native XLM (or other asset) payment via Stellar Horizon.
+   *
+   * Uses the configured admin keypair (`SOROBAN_SECRET_KEY` /
+   * `STELLAR_ADMIN_SECRET`) as the source account.  Intended for payout
+   * job execution where the platform wallet disburses funds to a recipient.
+   */
+  async sendPayment(
+    recipientAddress: string,
+    amount: number,
+    asset: string = 'XLM',
+  ): Promise<{ transactionHash: string; ledger: number }> {
+    const secretKey =
+      this.configService.get<string>('SOROBAN_SECRET_KEY') ||
+      this.configService.get<string>('STELLAR_ADMIN_SECRET');
+
+    if (!secretKey) {
+      throw new Error('No Stellar secret key configured for payments');
+    }
+
+    const sourceKeypair = Keypair.fromSecret(secretKey);
+    const sourceAccount = await this.horizonServer.loadAccount(
+      sourceKeypair.publicKey(),
+    );
+
+    const paymentAsset =
+      asset === 'XLM'
+        ? StellarSdk.Asset.native()
+        : new StellarSdk.Asset(asset, sourceKeypair.publicKey());
+
+    const tx = new TransactionBuilder(sourceAccount, {
+      fee: '100',
+      networkPassphrase: this.networkPassphrase,
+    })
+      .addOperation(
+        Operation.payment({
+          destination: recipientAddress,
+          asset: paymentAsset,
+          amount: amount.toFixed(7),
+        }),
+      )
+      .setTimeout(30)
+      .build();
+
+    tx.sign(sourceKeypair);
+
+    const result = await this.horizonServer.submitTransaction(tx);
+
+    return {
+      transactionHash: result.hash,
+      ledger: (result as any).ledger ?? 0,
+    };
+  }
 }
