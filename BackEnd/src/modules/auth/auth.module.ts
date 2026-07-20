@@ -10,6 +10,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { getJwtPrivateKey } from '../../common/utils/jwt-keys';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { getJwtPrivateKey } from '../../common/utils/jwt-keys';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([RefreshToken]),
+    UsersModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard],
