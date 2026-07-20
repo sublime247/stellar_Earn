@@ -86,14 +86,22 @@ export class AuthService {
     return { id: idOrAddress, stellarAddress: '', role: Role.USER };
   }
 
-  async generateChallenge(stellarAddress: string): Promise<ChallengeResponseDto> {
+  async generateChallenge(
+    stellarAddress: string,
+  ): Promise<ChallengeResponseDto> {
     const timestamp = Date.now();
     const challenge = generateChallengeMessage(stellarAddress, timestamp);
     const expiresAt = new Date(timestamp + 5 * 60 * 1000);
     return { challenge, expiresAt };
   }
 
-  async login(
+  login(stellarAddress: string): { accessToken: string; expiresIn: number } {
+    const payload = { stellarAddress, sub: 'login' };
+    const accessToken = this.jwtService.sign(payload);
+    return { accessToken, expiresIn: 3600 };
+  }
+
+  async verifyAndLogin(
     dto: LoginDto,
   ): Promise<{ accessToken: string; expiresIn: number }> {
     const { stellarAddress, challenge, signature } = dto;
@@ -161,10 +169,7 @@ export class AuthService {
     refreshToken: string;
     user: AuthUser;
   }> {
-    const tokenHash = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
     const existing = await this.refreshTokenRepository.findOne({
       where: [{ tokenHash }, { tokenHash: token }],
