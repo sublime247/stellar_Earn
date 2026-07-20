@@ -34,7 +34,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Authenticate with a signed Stellar challenge' })
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
-    const result = await this.authService.login(loginDto);
+    const result = await this.authService.verifyAndLogin(loginDto);
 
     return res.json(result);
   }
