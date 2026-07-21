@@ -191,7 +191,9 @@ describe('AuthService', () => {
 
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('refreshToken');
+      expect(result).toHaveProperty('expiresIn');
       expect(result).toHaveProperty('user');
+      expect(typeof result.expiresIn).toBe('number');
     });
 
     it('should throw UnauthorizedException for invalid refresh token', async () => {

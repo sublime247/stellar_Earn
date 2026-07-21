@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus } from '@nestjs/common';
+import { HttpStatus, UnauthorizedException } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/auth.dto';
+import { LoginDto, RefreshTokenDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { generateRandomStellarAddress } from 'test/utils/test-helpers';
@@ -13,6 +13,7 @@ import { generateRandomStellarAddress } from 'test/utils/test-helpers';
  * Covers:
  *  - POST /auth/login – success path
  *  - POST /auth/login – missing / invalid body fields
+ *  - POST /auth/refresh – rotation success and downstream failure
  *  - Guard-protected routes rejecting unauthenticated requests
  */
 describe('AuthController', () => {
@@ -32,9 +33,25 @@ describe('AuthController', () => {
         accessToken: 'mock.access.token',
         expiresIn: 3600,
       }),
+      verifyAndLogin: jest.fn().mockResolvedValue({
+        accessToken: 'mock.access.token',
+        expiresIn: 3600,
+      }),
+      refreshTokens: jest.fn().mockResolvedValue({
+        accessToken: 'new.access.token',
+        refreshToken: 'new-refresh-token',
+        expiresIn: 900,
+        user: {
+          id: 'user-1',
+          stellarAddress:
+            'GBUQWP3BOUZX34ULNQG23RQ6F4YUSXHTQA5XPJMWRFT5GEVQA3I5UU4K',
+          role: 'USER',
+        },
+      }),
       validate: jest.fn().mockReturnValue({
         id: 'dummy-id',
-        stellarAddress: 'GBUQWP3BOUZX34ULNQG23RQ6F4YUSXHTQA5XPJMWRFT5GEVQA3I5UU4K',
+        stellarAddress:
+          'GBUQWP3BOUZX34ULNQG23RQ6F4YUSXHTQA5XPJMWRFT5GEVQA3I5UU4K',
         role: 'USER',
       }),
     };
@@ -66,7 +83,7 @@ describe('AuthController', () => {
   // ─── POST /auth/login ─────────────────────────────────────────────────────
 
   describe('POST /auth/login', () => {
-    it('should call AuthService.login with the stellarAddress from the DTO', async () => {
+    it('should call AuthService.verifyAndLogin with the login DTO', async () => {
       const stellarAddress = generateRandomStellarAddress();
       const loginDto: LoginDto = {
         stellarAddress,
@@ -77,14 +94,14 @@ describe('AuthController', () => {
 
       await controller.login(loginDto, res);
 
-      expect(authService.login).toHaveBeenCalledTimes(1);
-      expect(authService.login).toHaveBeenCalledWith(loginDto.stellarAddress);
+      expect(authService.verifyAndLogin).toHaveBeenCalledTimes(1);
+      expect(authService.verifyAndLogin).toHaveBeenCalledWith(loginDto);
     });
 
-    it('should respond with the token object returned by AuthService.login', async () => {
+    it('should respond with the token object returned by AuthService.verifyAndLogin', async () => {
       const stellarAddress = generateRandomStellarAddress();
       const tokenResponse = { accessToken: 'jwt.token.value', expiresIn: 3600 };
-      authService.login.mockReturnValue(tokenResponse);
+      authService.verifyAndLogin.mockResolvedValue(tokenResponse);
 
       const loginDto: LoginDto = {
         stellarAddress,
@@ -116,11 +133,11 @@ describe('AuthController', () => {
       expect(typeof responseBody.expiresIn).toBe('number');
     });
 
-    it('should propagate errors thrown by AuthService.login', async () => {
+    it('should propagate errors thrown by AuthService.verifyAndLogin', async () => {
       const stellarAddress = generateRandomStellarAddress();
-      authService.login.mockImplementation(() => {
-        throw new Error('Service failure');
-      });
+      authService.verifyAndLogin.mockRejectedValue(
+        new Error('Service failure'),
+      );
 
       const loginDto: LoginDto = {
         stellarAddress,
@@ -131,6 +148,41 @@ describe('AuthController', () => {
 
       await expect(controller.login(loginDto, res)).rejects.toThrow(
         'Service failure',
+      );
+    });
+  });
+
+  // ─── POST /auth/refresh ───────────────────────────────────────────────────
+
+  describe('POST /auth/refresh', () => {
+    it('should call AuthService.refreshTokens with the refreshToken from the DTO', async () => {
+      const dto: RefreshTokenDto = { refreshToken: 'raw-refresh-token' };
+
+      await controller.refresh(dto);
+
+      expect(authService.refreshTokens).toHaveBeenCalledTimes(1);
+      expect(authService.refreshTokens).toHaveBeenCalledWith(dto.refreshToken);
+    });
+
+    it('should return the rotated token pair and user from the service', async () => {
+      const dto: RefreshTokenDto = { refreshToken: 'raw-refresh-token' };
+
+      const result = await controller.refresh(dto);
+
+      expect(result).toHaveProperty('accessToken');
+      expect(result).toHaveProperty('refreshToken');
+      expect(result).toHaveProperty('expiresIn');
+      expect(result).toHaveProperty('user');
+    });
+
+    it('should propagate UnauthorizedException for an invalid, revoked, or expired refresh token', async () => {
+      authService.refreshTokens.mockRejectedValue(
+        new UnauthorizedException('Invalid refresh token'),
+      );
+      const dto: RefreshTokenDto = { refreshToken: 'bad-token' };
+
+      await expect(controller.refresh(dto)).rejects.toThrow(
+        UnauthorizedException,
       );
     });
   });
@@ -177,6 +229,10 @@ describe('AuthController', () => {
             provide: AuthService,
             useValue: {
               login: jest.fn().mockReturnValue({
+                accessToken: 'valid.token',
+                expiresIn: 3600,
+              }),
+              verifyAndLogin: jest.fn().mockResolvedValue({
                 accessToken: 'valid.token',
                 expiresIn: 3600,
               }),

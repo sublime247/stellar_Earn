@@ -14,6 +14,11 @@ and this module adheres to [Semantic Versioning](https://semver.org/).
 
 - `POST /auth/challenge` endpoint that issues a time-boxed (5 min), single-use Stellar authentication challenge for a given address using `generateChallengeMessage` from `utils/signature`.
 - Complete `AuthService` implementation: `generateChallenge`, `login` (Stellar signature verification via `verifyStellarSignature`), `generateTokens` (JWT + SHA-256-hashed refresh token), `refreshTokens` (rotation with old token revocation), `revokeToken` (single session or all-sessions), `validateUser` (UUID or Stellar address lookup), and `loginOAuthUser` (Google / GitHub OAuth upsert flow).
+- `POST /auth/refresh` endpoint wiring up the previously-implemented `AuthService.refreshTokens` rotation flow: accepts a `RefreshTokenDto`, returns a rotated `TokenResponseDto` (new access token, new refresh token, `expiresIn`, user), and revokes the presented refresh token in the same operation.
+
+### Changed
+
+- `AuthService.refreshTokens` now also returns `expiresIn` for the newly issued access token, matching the `TokenResponseDto` contract.
 
 ### Changed
 
