@@ -1,4 +1,9 @@
-import { Injectable, Logger, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ForbiddenException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { QuotaConfig } from './entities/quota-config.entity';
@@ -79,6 +84,11 @@ export class QuotaService {
         where: { tenantId, resourceType: QuotaResourceType.QUEST, periodStart },
         lock: { mode: 'pessimistic_write' },
       });
+      if (!usage) {
+        throw new InternalServerErrorException(
+          'Failed to lock quota usage row after insert',
+        );
+      }
 
       if (usage.questCount >= limit) {
         this.logger.warn(
@@ -141,6 +151,11 @@ export class QuotaService {
         },
         lock: { mode: 'pessimistic_write' },
       });
+      if (!usage) {
+        throw new InternalServerErrorException(
+          'Failed to lock quota usage row after insert',
+        );
+      }
 
       const currentTotal = Number(usage.payoutAmount);
       if (currentTotal + amount > limit) {
