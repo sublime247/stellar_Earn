@@ -66,7 +66,7 @@ export class AuthService {
           return {
             id: user.id,
             stellarAddress: user.stellarAddress ?? '',
-            role: user.role as string,
+            role: user.role,
           };
         }
       } catch {
@@ -80,7 +80,7 @@ export class AuthService {
       return {
         id: user.id,
         stellarAddress: user.stellarAddress ?? '',
-        role: user.role as string,
+        role: user.role,
       };
     }
     return { id: idOrAddress, stellarAddress: '', role: Role.USER };
@@ -167,6 +167,7 @@ export class AuthService {
   async refreshTokens(token: string): Promise<{
     accessToken: string;
     refreshToken: string;
+    expiresIn: number;
     user: AuthUser;
   }> {
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
@@ -225,23 +226,28 @@ export class AuthService {
       role: user.role,
     };
     const accessToken = this.jwtService.sign(jwtPayload);
+    const accessExpiresMs = this.parseExpirationToMs(
+      this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRATION', '15m'),
+    );
 
     const authUser: AuthUser = {
       id: user.id,
       stellarAddress: user.stellarAddress ?? '',
-      role: user.role as string,
+      role: user.role,
     };
 
-    return { accessToken, refreshToken: rawRefreshToken, user: authUser };
+    return {
+      accessToken,
+      refreshToken: rawRefreshToken,
+      expiresIn: Math.floor(accessExpiresMs / 1000),
+      user: authUser,
+    };
   }
 
   async revokeToken(userId: string, tokenId?: string): Promise<void> {
     if (tokenId) {
       const token = await this.refreshTokenRepository.findOne({
-        where: [
-          { id: tokenId, userId },
-          { id: tokenId },
-        ],
+        where: [{ id: tokenId, userId }, { id: tokenId }],
       });
       if (!token) {
         throw new NotFoundException('Token not found');
@@ -285,7 +291,7 @@ export class AuthService {
         googleId: profile.googleId,
         githubId: profile.githubId,
         avatarUrl: profile.avatarUrl,
-        role: Role.USER as any,
+        role: Role.USER,
       });
     }
 

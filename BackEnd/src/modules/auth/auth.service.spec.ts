@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { RefreshToken } from './entities/refresh-token.entity';
@@ -40,11 +42,11 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         {
-          provide: 'JwtService',
+          provide: JwtService,
           useValue: jwtService,
         },
         {
-          provide: 'ConfigService',
+          provide: ConfigService,
           useValue: configService,
         },
         {
@@ -63,13 +65,7 @@ describe('AuthService', () => {
           useValue: mockRefreshTokenRepository,
         },
       ],
-    })
-      .useMocker((token) => {
-        if (token === 'JwtService') return jwtService;
-        if (token === 'ConfigService') return configService;
-        return undefined;
-      })
-      .compile();
+    }).compile();
 
     service = module.get<AuthService>(AuthService);
     usersService = module.get<UsersService>(UsersService);
@@ -189,7 +185,9 @@ describe('AuthService', () => {
 
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('refreshToken');
+      expect(result).toHaveProperty('expiresIn');
       expect(result).toHaveProperty('user');
+      expect(typeof result.expiresIn).toBe('number');
     });
 
     it('should throw UnauthorizedException for invalid refresh token', async () => {
