@@ -6,9 +6,6 @@
 use crate::errors::Error;
 use soroban_sdk::{contracttype, symbol_short, Env, Symbol};
 
-#[cfg(any(test, feature = "testutils"))]
-use soroban_sdk::testutils::budget::Budget;
-
 /// Maximum allowed instructions per named entrypoint.
 #[contracttype]
 #[derive(Clone, Debug)]

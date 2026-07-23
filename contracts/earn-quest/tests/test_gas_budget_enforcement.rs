@@ -16,6 +16,7 @@ fn test_runtime_gas_budget_enforcement_success() {
 #[test]
 fn test_runtime_gas_budget_enforcement_rejection() {
     let env = Env::default();
+    let _ = &env;
     let ep = symbol_short!("init");
 
     let targets = default_targets();
@@ -41,6 +42,7 @@ fn test_batch_entrypoints_budget_targets_configured() {
 #[test]
 fn test_over_budget_evaluation_returns_gas_budget_exceeded_error() {
     let env = Env::default();
+    let _ = &env;
     let ep = symbol_short!("reg_qst");
 
     // Verify that exceeding max_instructions evaluates to Error::GasBudgetExceeded
