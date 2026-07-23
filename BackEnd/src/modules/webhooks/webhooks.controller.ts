@@ -24,6 +24,7 @@ import {
   ApiQuery,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import {
   WebhooksService,
   WebhookEvent,
@@ -50,6 +51,7 @@ import { Role } from '../../common/enums/role.enum';
 
 @ApiTags('Webhooks')
 @Controller('webhooks')
+@Throttle({ default: { limit: 30, ttl: 60000 } })
 export class WebhooksController {
   private readonly logger = new Logger(WebhooksController.name);
 
